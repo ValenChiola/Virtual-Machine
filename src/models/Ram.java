@@ -4,23 +4,37 @@ public class Ram {
     private int capacity = 16384; // in bytes
     private byte[] cs;
     private byte[] ds;
+    VM vm;
+
+    public Ram(VM vm) {
+        this.vm = vm;
+    }
 
     public void init(byte[] code) {
         int codeSize = code.length;
         cs = new byte[codeSize];
         ds = new byte[capacity - codeSize];
 
-        System.out.println(codeSize);
-
         for (int i = 0; i < codeSize; i++)
             cs[i] = code[i];
+    }
 
-        for (int i = 0; i < codeSize; i++) {
-            System.out.printf("0x%X", cs[i]); // fase de prueba
-            System.out.print(" "); // fase de prueba
+    public int getCapacity() {
+        return capacity;
+    }
 
-        }
+    public int getDSValue(int logicAddress) {
+        int data = 0;
 
+        for (int i = 0; i < vm.bytesToAccess; i++)
+            data = (data << 8) + ds[logicAddress + i];
+
+        return data;
+    }
+
+    public void setDSValue(int logicAddress, int value) {
+        for (int i = 0; i < vm.bytesToAccess; i++)
+            this.ds[logicAddress + i] = (byte) (value >> (12 - 4 * i));
     }
 
     public int getValue(int physicAddress) {

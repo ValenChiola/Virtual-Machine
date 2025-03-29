@@ -18,7 +18,7 @@ public class Processor {
         if (physicAddress < DSBase) // If I am in the CS
             throw new Error("Out of bounds!");
 
-        int DSLimit = vm.ts.getLimit(segment); // If I Pass the memory limit
+        int DSLimit = vm.ts.getLimit(); // If I Pass the memory limit
         if (physicAddress + vm.bytesToAccess > DSLimit)
             throw new Error("Out of bounds!");
 
