@@ -1,6 +1,7 @@
 /bin
-/settings
+/.settings
 .classpath
+*.txt
 *.asm
 *.vmx
 *.exe
