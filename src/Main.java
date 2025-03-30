@@ -1,4 +1,4 @@
-import models.VM;
+import models.components.VM;
 
 public class Main {
 
