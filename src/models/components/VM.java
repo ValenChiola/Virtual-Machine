@@ -9,17 +9,18 @@ import java.util.Map;
 import models.functions.Mnemonic;
 import models.functions.Mov;
 import models.functions.Xor;
+import models.functions.Sys;
 
 public class VM {
 	final int architecture = 32; // in bits
 	final int bytesToAccess = architecture / 8;
 
 	// Components
-	Ram ram;
-	TableSegments ts;
-	Processor processor;
-	Map<Integer, Register> registers;
-	Map<Integer, Mnemonic> mnemonics;
+	public Ram ram;
+	public TableSegments ts;
+	public Processor processor;
+	public Map<Integer, Register> registers;
+	public Map<Integer, Mnemonic> mnemonics;
 
 	public VM() {
 		ram = new Ram(this);
@@ -59,6 +60,7 @@ public class VM {
 			// Init Mnemonics
 			mnemonics.put(0x10, new Mov(this));
 			mnemonics.put(0x1B, new Xor(this));
+			mnemonics.put(0x00, new Sys(this));
 
 			execute(code);
 
@@ -85,7 +87,7 @@ public class VM {
 	private void execute(byte[] code) {
 		Register IP = registers.get(5);
 		//while (IP.getValue() < code.length) {
-		for (int ii = 0; ii < 2; ii++) {
+		for (int ii = 0; ii < 7; ii++) {
 			System.out.println("#######################################" + ii);
 			int IpValue = IP.getValue();
 
@@ -115,11 +117,16 @@ public class VM {
 
 			Mnemonic mnemonic = mnemonics.get(operation);
 
-			if (mnemonic != null)
-				mnemonic._execute(Abytes, Bbytes, A, B);
+			if (mnemonic == null)
+				throw new Error("Comando inexistente :/");
+
+			mnemonic._execute(Abytes, Bbytes, A, B);
 
 			System.out.println("EFX: " + dataReadHandler(0xF0, 1));
 			System.out.println("[4]: " + dataReadHandler(0x400, 3));
+			System.out.println("EDX: " + dataReadHandler(0xD0, 1));
+			System.out.println("CH: " + dataReadHandler(0xC0, 1));
+			System.out.println("AL: " + dataReadHandler(0xA0, 1));
 		}
 	}
 
@@ -143,7 +150,7 @@ public class VM {
 			
 			// El bit 5 y 6 para ax, ah o al.
 			int identifier = (address & 0xC) >> 2;
-			registers.get(registerAddress).setValue(value,identifier);
+			registers.get(registerAddress).setValue(value, identifier);
 	  }
 		else if (type == 2)
 			throw new Error("Malardo"); // Inmediato

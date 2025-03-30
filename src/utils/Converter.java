@@ -2,10 +2,12 @@ package utils;
 
 public class Converter {
 
-    public static byte hexaToBinary(String hex) {
-        if (hex == null || hex.length() != 2)
-            throw new IllegalArgumentException("El valor hexadecimal debe tener exactamente 2 caracteres.");
-
-        return (byte) Integer.parseInt(hex, 16);
+    public static int stringToInt(String data, int AL) {
+        if (AL == 0x01 || AL == 0x02) return Integer.parseInt(data, 10);
+        if (AL  == 0x04) return Integer.parseInt(data, 8);
+        if (AL  == 0x08) return Integer.parseInt(data, 16);
+        if (AL  == 0x10) return Integer.parseInt(data, 2);
+    
+        throw new Error("Converter failed");
     }
 }

@@ -18,14 +18,11 @@ public class Register {
     public int getValue(int identifier) {
         if (identifier == 0)
             return this.value;
-        else if (identifier == 1)
-            // AL
+        else if (identifier == 1) // AL
             return this.value & 0xFF;
-        else if (identifier == 2)
-            // AH
+        else if (identifier == 2) // AH
             return (this.value & 0xFF00) >> 8;
-        else
-            // AX
+        else // AX
             return this.value & 0xFFFF;
     }
 
@@ -38,12 +35,12 @@ public class Register {
             this.value = value;
         else if (identifier == 1)
             // AL
-            this.value = (this.value & 0xFFFFFF00) + value & 0xFF;
+            this.value = (this.value & 0xFFFFFF00) | (value & 0xFF);
         else if (identifier == 2)
             // AH
-            this.value = (this.value & 0xFFFF00FF) + value & 0xFF00;
+            this.value = (this.value & 0xFFFF00FF) | ((value & 0xFF) << 8);
         else
             // AX
-            this.value = (this.value & 0xFFFF0000) + value & 0xFFFF;
+            this.value = (this.value & 0xFFFF0000) | (value & 0xFFFF);
     }
 }

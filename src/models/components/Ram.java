@@ -14,8 +14,8 @@ public class Ram {
         int CS = vm.ts.getBase(vm.ts.getCSKey());
         System.arraycopy(code, 0, memory, CS, code.length);
 
-        for (int i = CS; i < capacity; i += 4)
-            this.memory[i] = 1;
+        // for (int i = CS; i < capacity; i += 4)
+        //     this.memory[i] = 1;
     }
 
     public int getCapacity() {
