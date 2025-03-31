@@ -29,14 +29,12 @@ public class Sys extends Mnemonic {
         if (code == 1) {
             for (int i = 0; i < CL; i++) { // TODO: Chequear con juan el tema del CL
                 int fullData = Converter.stringToInt(sc.nextLine(), AL);
-                int data = 0;
-
-                for (int j = 0; j < CH; j++)
-                    data |= ((fullData >> (8 * j)) & 0xFF) << (8 * j);
                 
-                vm.dataWriteHandler(0xD0, data, 1);
-                //vm.dataWriteHandler(EDX.getValue() + (i * CL), data, 3);
-                
+                for (int j = 0; j < CH; j++){
+                    int data = (fullData >> ((CH - (j + 1)) * 8)) & 0xFF;
+                    // vm.dataWriteHandler((offset << 8) | (vm.ts.getDSKey() << 4), data, 3);
+                    vm.ram.setUniqueValue(EDX.getValue() + i * CL + j, data); // TODO: EDX tiene la direccion fisica literalmente. Comentar con Valen.
+                }
             }
         } else if (code == 2) {
             for (int i = 0; i < CL; i++) { 
@@ -45,8 +43,6 @@ public class Sys extends Mnemonic {
 
                 for (int j = 0; j < CH; j++)
                     data |= ((fullData >> (8 * j)) & 0xFF) << (8 * j);
-
-                System.out.println(data);
             }
         }
 

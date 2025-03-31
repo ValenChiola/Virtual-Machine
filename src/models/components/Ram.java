@@ -26,9 +26,9 @@ public class Ram {
         int physicAddress = vm.processor.logicToPhysic(logicAddress);
         int data = 0;
         
-        for (int i = 0; i < vm.bytesToAccess; i++)
+        for (int i = 0; i < vm.bytesToAccess; i++){
             data = (data << 8) + this.memory[physicAddress + i];
-        
+        }
         return data;
     }
 
@@ -37,5 +37,9 @@ public class Ram {
 
         for (int i = 0; i < vm.bytesToAccess; i++) 
             this.memory[physicAddress + i] = (byte) (value >> (24 - 8 * i));
+    }
+
+    public void setUniqueValue(int physicAddress, int value) { // TODO: Se crea para la funcion sys
+        this.memory[physicAddress] = (byte) value;
     }
 }

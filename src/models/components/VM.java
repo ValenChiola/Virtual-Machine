@@ -62,23 +62,23 @@ public class VM {
 			mnemonics.put(0x1B, new Xor(this));
 			mnemonics.put(0x00, new Sys(this));
 
-			execute(code);
-
-			System.out.println("-------------------------------------");
+			System.out.println("--------------------------------");
 			System.out.println("Header");
-			//muestra header
+			// muestra header
 			for (int i = 0; i < 8; i++) {
 				System.out.print(String.format("%02X ", content[i]));
 			}
 			System.out.println();
 			System.out.println("CS - CodeSize: " + codeSize);
-			//muestra CS
+			// muestra CS
 			for (int i = 0; i < codeSize; i++) {
 				System.out.print(String.format("%02X ", code[i]));
 			}
 			System.out.println();
-			System.out.println("-------------------------------------");
+			System.out.println("--------------------------------");
 
+			execute(code);
+			
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
 		}
@@ -88,7 +88,7 @@ public class VM {
 		Register IP = registers.get(5);
 		//while (IP.getValue() < code.length) {
 		for (int ii = 0; ii < 7; ii++) {
-			System.out.println("#######################################" + ii);
+			System.out.println("======     ITERACIÓN " + ii + "	  ======");
 			int IpValue = IP.getValue();
 
 			int instruction = code[IpValue];
@@ -113,20 +113,22 @@ public class VM {
 			System.out.println("Bbytes: "+String.format("%2s ", Integer.toBinaryString(Bbytes & 0x3)));
 			System.out.println("B: " +String.format("%24s ", Integer.toBinaryString(B & 0xFFFFFF)));
 			System.out.println("Operation: " +String.format("%02X ", operation));
-			System.out.println("#######################################");
-
+			
 			Mnemonic mnemonic = mnemonics.get(operation);
-
+			
 			if (mnemonic == null)
-				throw new Error("Comando inexistente :/");
-
+			throw new Error("Comando inexistente :/");
+			
 			mnemonic._execute(Abytes, Bbytes, A, B);
-
+			
+			System.out.println("--- Cambios --------------------");
 			System.out.println("EFX: " + dataReadHandler(0xF0, 1));
-			System.out.println("[4]: " + dataReadHandler(0x400, 3));
+			System.out.println("[4]: " + dataReadHandler(0x410, 3));
 			System.out.println("EDX: " + dataReadHandler(0xD0, 1));
 			System.out.println("CH: " + dataReadHandler(0xC0, 1));
 			System.out.println("AL: " + dataReadHandler(0xA0, 1));
+			System.out.println("DS: " + dataReadHandler(0x10, 3));
+			System.out.println("====== FIN DE ITERACIÓN " + ii + " ======");
 		}
 	}
 
@@ -153,10 +155,10 @@ public class VM {
 			registers.get(registerAddress).setValue(value, identifier);
 	  }
 		else if (type == 2)
-			throw new Error("Malardo"); // Inmediato
+			throw new Error("Estás haciendo cualquiera flaco."); // Inmediato
 
-		else if (type == 3) {
-			int segment = 0x00010000; // DS
+		else if (type == 3) {  // TODO: para usar esta funcion en memoria acordarse que literalmente guarda de a 4 bytes
+			int segment = (address & 0xFF) << 12; // DS
 			int offset = (address & 0xFFFF00) >> 8;
 			ram.setValue(segment + offset, value); // Memoria
 		}
@@ -186,7 +188,7 @@ public class VM {
 			return value & 0xFFFF; // por las dudas
 
 		// memoria
-		int segment = 0x10000; // DS
+		int segment = (value & 0xFF) << 12; // DS
 		int offset = (value & 0xFFFF00) >> 8;
 		return ram.getValue(segment + offset); 
 	}
