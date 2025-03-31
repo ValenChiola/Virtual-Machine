@@ -3,5 +3,4 @@
 .classpath
 *.txt
 .asm
-*.vmx
 .exe

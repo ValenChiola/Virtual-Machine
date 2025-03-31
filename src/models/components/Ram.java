@@ -33,13 +33,15 @@ public class Ram {
     }
 
     public void setValue(int logicAddress, int value) {
-        int physicAddress = vm.processor.logicToPhysic(logicAddress);
-
-        for (int i = 0; i < vm.bytesToAccess; i++) 
-            this.memory[physicAddress + i] = (byte) (value >> (24 - 8 * i));
+        setValue(logicAddress, value, vm.bytesToAccess)
     }
 
-    public void setUniqueValue(int physicAddress, int value) { // TODO: Se crea para la funcion sys
-        this.memory[physicAddress] = (byte) value;
+    public void setValue(int logicAddress, int value, int bytesToWrite) {
+        int physicAddress = vm.processor.logicToPhysic(logicAddress);
+
+        for (int i = bytesToWrite; i >= 0; i--){ 
+            this.memory[physicAddress + i] = value & 0xFF;
+            value >>= 8;
+        }
     }
 }

@@ -157,8 +157,8 @@ public class VM {
 		else if (type == 2)
 			throw new Error("Estás haciendo cualquiera flaco."); // Inmediato
 
-		else if (type == 3) {  // TODO: para usar esta funcion en memoria acordarse que literalmente guarda de a 4 bytes
-			int segment = (address & 0xFF) << 12; // DS
+		else if (type == 3) {
+			int segment = (address & 0xFF) << 12;
 			int offset = (address & 0xFFFF00) >> 8;
 			ram.setValue(segment + offset, value); // Memoria
 		}
@@ -188,7 +188,7 @@ public class VM {
 			return value & 0xFFFF; // por las dudas
 
 		// memoria
-		int segment = (value & 0xFF) << 12; // DS
+		int segment = (value & 0xFF) << 12;
 		int offset = (value & 0xFFFF00) >> 8;
 		return ram.getValue(segment + offset); 
 	}

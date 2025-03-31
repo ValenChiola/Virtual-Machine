@@ -27,13 +27,14 @@ public class Sys extends Mnemonic {
         int AL = EAX.getValue(1);
 
         if (code == 1) {
-            for (int i = 0; i < CL; i++) { // TODO: Chequear con juan el tema del CL
+            for (int i = 0; i < CL; i++) {
                 int fullData = Converter.stringToInt(sc.nextLine(), AL);
                 
                 for (int j = 0; j < CH; j++){
                     int data = (fullData >> ((CH - (j + 1)) * 8)) & 0xFF;
-                    // vm.dataWriteHandler((offset << 8) | (vm.ts.getDSKey() << 4), data, 3);
-                    vm.ram.setUniqueValue(EDX.getValue() + i * CL + j, data); // TODO: EDX tiene la direccion fisica literalmente. Comentar con Valen.
+                    int segment = 0x10000; // DS
+                    int offset = EDX.getValue() + i * CL + j;
+                    vm.ram.setValue(segment + offset, data, 1);
                 }
             }
         } else if (code == 2) {
