@@ -33,14 +33,15 @@ public class Ram {
     }
 
     public void setValue(int logicAddress, int value) {
-        setValue(logicAddress, value, vm.bytesToAccess)
+        setValue(logicAddress, value, vm.bytesToAccess);
     }
 
     public void setValue(int logicAddress, int value, int bytesToWrite) {
         int physicAddress = vm.processor.logicToPhysic(logicAddress);
-
+        System.out.println("LOGIC: " + String.format("%08X ",logicAddress));
+        System.out.println("PHYSIC: " + physicAddress);
         for (int i = bytesToWrite; i >= 0; i--){ 
-            this.memory[physicAddress + i] = value & 0xFF;
+            this.memory[physicAddress + i] = (byte)(value & 0xFF);
             value >>= 8;
         }
     }

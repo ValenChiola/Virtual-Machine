@@ -38,13 +38,13 @@ public class Sys extends Mnemonic {
                 }
             }
         } else if (code == 2) {
-            for (int i = 0; i < CL; i++) { 
-                int fullData = EDX.getValue();
-                int data = 0;
+            // for (int i = 0; i < CL; i++) { 
+            //     int fullData = EDX.getValue();
+            //     int data = 0;
 
-                for (int j = 0; j < CH; j++)
-                    data |= ((fullData >> (8 * j)) & 0xFF) << (8 * j);
-            }
+            //     for (int j = 0; j < CH; j++)
+            //         data |= ((fullData >> (8 * j)) & 0xFF) << (8 * j);
+            // }
         }
 
     }

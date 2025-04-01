@@ -125,7 +125,7 @@ public class VM {
 			System.out.println("EFX: " + dataReadHandler(0xF0, 1));
 			System.out.println("[4]: " + dataReadHandler(0x410, 3));
 			System.out.println("EDX: " + dataReadHandler(0xD0, 1));
-			System.out.println("CH: " + dataReadHandler(0xC0, 1));
+			System.out.println("CH: " + dataReadHandler(0xC8, 1));
 			System.out.println("AL: " + dataReadHandler(0xA0, 1));
 			System.out.println("DS: " + dataReadHandler(0x10, 3));
 			System.out.println("====== FIN DE ITERACIÓN " + ii + " ======");
@@ -158,9 +158,19 @@ public class VM {
 			throw new Error("Estás haciendo cualquiera flaco."); // Inmediato
 
 		else if (type == 3) {
-			int segment = (address & 0xFF) << 12;
-			int offset = (address & 0xFFFF00) >> 8;
-			ram.setValue(segment + offset, value); // Memoria
+			int aux = (value & 0xFF) >> 4;
+			if (aux == 0) {
+				int segment = (address & 0xFF) << 12;
+				int offset = (address & 0xFFFF00) >> 8;
+				ram.setValue(segment + offset, value); 
+			}else{
+				Register register = registers.get(aux);
+				if (register == null)
+					throw new Error("Register not found.");
+				int segment = 0x10000;
+				int offset = register.getValue();
+				ram.setValue(segment + offset, value);
+			}
 		}
 	}
 
@@ -182,15 +192,25 @@ public class VM {
 		if (type == 1) { // registro
 			int registerAddress = (value & 0xFF) >> 4;
 			int identifier = (value & 0xC) >> 2; // AX, AH, AL
-
+			
 			return registers.get(registerAddress).getValue(identifier);
 		} if (type == 2) // inmediato
 			return value & 0xFFFF; // por las dudas
 
 		// memoria
-		int segment = (value & 0xFF) << 12;
-		int offset = (value & 0xFFFF00) >> 8;
-		return ram.getValue(segment + offset); 
+		int aux = (value & 0xFF) >> 4;
+		if(aux == 0){
+			int segment = (value & 0xFF) << 12;
+			int offset = (value & 0xFFFF00) >> 8;
+			return ram.getValue(segment + offset); 
+		}else{
+			Register register = registers.get(aux);
+			if(register == null) throw new Error("Register not found.");
+			int segment = 0x10000;
+			int offset = register.getValue();
+
+			return ram.getValue(segment + offset);
+		}
 	}
 
 }
