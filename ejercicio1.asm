@@ -9,7 +9,7 @@ otro:   mov edx     ,ds     ;donde quiero empezar a leer
         cmp [edx]   ,0      ;modifico el CC sin alterar el registro para saber si es negativo
         jn  sigue           ;si el CC indica que el numero es negativo, ejecuto la funcion 'sigue'
         add [4]     ,[edx]  ;
-        add [efx]   ,1      ;incremento en uno el valor de efx
+        add efx     ,1        ;incremento en uno el valor de efx
 
 
 sigue:  cmp efx     ,0      ;guardo en CC

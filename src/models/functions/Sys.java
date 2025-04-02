@@ -26,24 +26,22 @@ public class Sys extends Mnemonic {
         int CL = ECX.getValue(1);
         int AL = EAX.getValue(1);
 
-        if (code == 1) { // Leer
+        if (code == 1) { // Read
             for (int i = 0; i < CL; i++) {
-                int fullData = Converter.stringToInt(sc.nextLine(), AL);
+                int fullData = Converter.stringToNumber(sc.nextLine(), AL);
 
-                for (int j = 0; j < CH; j++){
+                for (int j = 0; j < CH; j++) {
                     int data = (fullData >> ((CH - (j + 1)) * 8)) & 0xFF;
                     int logicAddress = EDX.getValue() + i * CL + j;
                     vm.ram.setValue(logicAddress, data, 1);
                 }
             }
         } else if (code == 2) { // Write
-            // for (int i = 0; i < CL; i++) { 
-            //     int fullData = EDX.getValue();
-            //     int data = 0;
-
-            //     for (int j = 0; j < CH; j++)
-            //         data |= ((fullData >> (8 * j)) & 0xFF) << (8 * j);
-            // }
+            for (int i = 0; i < CL; i++) {
+                int logicAddress = EDX.getValue() + i * CL;
+                int value = vm.ram.getValue(logicAddress, CH);
+                System.out.println(Converter.numberToString(value, AL));
+            }
         }
 
     }

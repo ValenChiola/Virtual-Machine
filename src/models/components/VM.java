@@ -12,6 +12,7 @@ import models.functions.Mnemonic;
 import models.functions.Mov;
 import models.functions.Xor;
 import models.functions.J.JN;
+import models.functions.J.JZ;
 import models.functions.Sys;
 
 public class VM {
@@ -47,6 +48,7 @@ public class VM {
 			// Init Mnemonics :o
 			mnemonics.put(0x00, new Sys(this));
 			mnemonics.put(0x04, new JN(this));
+			mnemonics.put(0x02, new JZ(this));
 			mnemonics.put(0x10, new Mov(this));
 			mnemonics.put(0x11, new Add(this));
 			mnemonics.put(0x16, new Cmp(this));
@@ -93,7 +95,7 @@ public class VM {
 	private void execute(byte[] code) {
 		Register IP = registers.get(5);
 		//while (IP.getValue() < code.length) {
-		for (int ii = 0; ii < 10; ii++) {
+		for (int ii = 0; ii < 19; ii++) {
 			System.out.println("======     ITERACIÓN " + (ii + 1) + "	  ======");
 			int IpValue = IP.getValue();
 
