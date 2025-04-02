@@ -6,13 +6,31 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
-import models.functions.Add;
-import models.functions.Cmp;
+import models.functions.Ldh;
+import models.functions.Ldl;
 import models.functions.Mnemonic;
 import models.functions.Mov;
-import models.functions.Xor;
+import models.functions.Rnd;
+import models.functions.Stop;
+import models.functions.Swap;
+import models.functions.J.JMP;
 import models.functions.J.JN;
+import models.functions.J.JNN;
+import models.functions.J.JNP;
+import models.functions.J.JNZ;
+import models.functions.J.JP;
 import models.functions.J.JZ;
+import models.functions.arithmetic.Add;
+import models.functions.arithmetic.And;
+import models.functions.arithmetic.Cmp;
+import models.functions.arithmetic.Div;
+import models.functions.arithmetic.Mul;
+import models.functions.arithmetic.Not;
+import models.functions.arithmetic.Or;
+import models.functions.arithmetic.Shl;
+import models.functions.arithmetic.Shr;
+import models.functions.arithmetic.Sub;
+import models.functions.arithmetic.Xor;
 import models.functions.Sys;
 
 public class VM {
@@ -45,22 +63,13 @@ public class VM {
 			byte[] code = new byte[codeSize];
 			System.arraycopy(content, 8, code, 0, codeSize);
 
-			// Init Mnemonics :o
-			mnemonics.put(0x00, new Sys(this));
-			mnemonics.put(0x04, new JN(this));
-			mnemonics.put(0x02, new JZ(this));
-			mnemonics.put(0x10, new Mov(this));
-			mnemonics.put(0x11, new Add(this));
-			mnemonics.put(0x16, new Cmp(this));
-			mnemonics.put(0x1B, new Xor(this));
-
 			// Program loading :P
 			ts.init(code);
 			ram.init(code);
 
 			// Init registers :)
 			registers.put(0, new Register(0x00000000));
-			registers.put(1, new Register(0x00010000));// Dirección lógica hacia DS (Claro... No es 0 como pensabamos!)
+			registers.put(1, new Register(0x00010000));// Dirección lógica hacia DS
 			registers.put(5, new Register(0x00000000));
 			registers.put(8, new Register());
 			registers.put(9, new Register());
@@ -70,6 +79,33 @@ public class VM {
 			registers.put(13, new Register());
 			registers.put(14, new Register());
 			registers.put(15, new Register());
+
+			// Init Mnemonics :o
+			mnemonics.put(0x00, new Sys(this));
+			mnemonics.put(0x01, new JMP(this));
+			mnemonics.put(0x02, new JZ(this));
+			mnemonics.put(0x03, new JP(this));
+			mnemonics.put(0x04, new JN(this));
+			mnemonics.put(0x05, new JNZ(this));
+			mnemonics.put(0x06, new JNP(this));
+			mnemonics.put(0x07, new JNN(this));
+			mnemonics.put(0x08, new Not(this));
+			mnemonics.put(0x0F, new Stop(this));
+			mnemonics.put(0x10, new Mov(this));
+			mnemonics.put(0x11, new Add(this));
+			mnemonics.put(0x12, new Sub(this));
+			mnemonics.put(0x13, new Swap(this));
+			mnemonics.put(0x14, new Mul(this));
+			mnemonics.put(0x15, new Div(this));
+			mnemonics.put(0x16, new Cmp(this));
+			mnemonics.put(0x17, new Shl(this));
+			mnemonics.put(0x18, new Shr(this));
+			mnemonics.put(0x19, new And(this));
+			mnemonics.put(0x1A, new Or(this));
+			mnemonics.put(0x1B, new Xor(this));
+			mnemonics.put(0x1C, new Ldl(this));
+			mnemonics.put(0x1D, new Ldh(this));
+			mnemonics.put(0x1E, new Rnd(this));
 
 			System.out.println("--------------------------------");
 			System.out.println("Header");
@@ -94,9 +130,9 @@ public class VM {
 
 	private void execute(byte[] code) {
 		Register IP = registers.get(5);
-		//while (IP.getValue() < code.length) {
-		for (int ii = 0; ii < 19; ii++) {
-			System.out.println("======     ITERACIÓN " + (ii + 1) + "	  ======");
+		int ii = 0;
+		while (IP.getValue() < code.length) {
+			// System.out.println("======     ITERACIÓN " + (ii + 1) + "	  ======");
 			int IpValue = IP.getValue();
 
 			int instruction = ram.getValue(IpValue, 1);
@@ -116,30 +152,30 @@ public class VM {
 
 			IP.setValue(ts.getBaseShifted(0) | IpValue + (ABytes + BBytes + 1));
 
-			System.out.println("Instruction: " + String.format("%8s ", Integer.toBinaryString(instruction & 0xFF)));
-			System.out.println("Abytes: " + String.format("%2s ", Integer.toBinaryString(ABytes & 0x3)));
-			System.out.println("A: " + String.format("%24s ", Integer.toBinaryString(A & 0xFFFFFF)));
-			System.out.println("Bbytes: " + String.format("%2s ", Integer.toBinaryString(BBytes & 0x3)));
-			System.out.println("B: " + String.format("%24s ", Integer.toBinaryString(B & 0xFFFFFF)));
-			System.out.println("Operation: " + String.format("%02X ", operation));
+			// System.out.println("Instruction: " + String.format("%8s ", Integer.toBinaryString(instruction & 0xFF)));
+			// System.out.println("Abytes: " + String.format("%2s ", Integer.toBinaryString(ABytes & 0x3)));
+			// System.out.println("A: " + String.format("%24s ", Integer.toBinaryString(A & 0xFFFFFF)));
+			// System.out.println("Bbytes: " + String.format("%2s ", Integer.toBinaryString(BBytes & 0x3)));
+			// System.out.println("B: " + String.format("%24s ", Integer.toBinaryString(B & 0xFFFFFF)));
+			//System.out.println("Operation: " + String.format("%02X ", operation));
 
 			Mnemonic mnemonic = mnemonics.get(operation);
 
 			if (mnemonic == null)
-				throw new Error("Comando inexistente :/");
+				throw new Error("Mnemonic " + operation + " not found :/");
 
 			mnemonic._execute(ABytes, BBytes, A, B);
 
-			System.out.println("--- Cambios --------------------");
-			System.out.println("CC: " + String.format("%32s ", Integer.toBinaryString(dataReadHandler(0X80, 1))));
-			System.out.println("IP: " + String.format("%08X ", dataReadHandler(0x50, 1)));
-			System.out.println("EAX: " + String.format("%08X ", dataReadHandler(0xA0, 1)));
-			System.out.println("ECX: " + String.format("%08X ", dataReadHandler(0xC0, 1)));
-			System.out.println("EDX: " + String.format("%08X ", dataReadHandler(0xD0, 1)));
-			System.out.println("EFX: " + String.format("%08X ", dataReadHandler(0xF0, 1)));
-			System.out.println("[0]/DS: " + String.format("%02X ", dataReadHandler(0x10, 3)));
-			System.out.println("[4]: " + String.format("%02X ", dataReadHandler(0x410, 3)));
-			System.out.println("====== FIN DE ITERACIÓN " + (ii + 1) + " ======");
+			// System.out.println("CC: " + String.format("%32s ", Integer.toBinaryString(dataReadHandler(0X80, 1))));
+			// System.out.println("IP: " + String.format("%08X ", dataReadHandler(0x50, 1)));
+			// System.out.println("EAX: " + String.format("%08X ", dataReadHandler(0xA0, 1)));
+			// System.out.println("ECX: " + String.format("%08X ", dataReadHandler(0xC0, 1)));
+			// System.out.println("EDX: " + String.format("%08X ", dataReadHandler(0xD0, 1)));
+			// System.out.println("EFX: " + String.format("%08X ", dataReadHandler(0xF0, 1)));
+			// System.out.println("[0]/DS: " + String.format("%02X ", dataReadHandler(0x10, 3)));
+			// System.out.println("[4]: " + String.format("%02X ", dataReadHandler(0x410, 3)));
+			// System.out.println("====== FIN DE ITERACIÓN " + (ii + 1) + " ======");
+			ii++;
 		}
 	}
 
@@ -168,7 +204,7 @@ public class VM {
 			throw new Error("Estás haciendo cualquiera flaco."); // Inmediato
 
 		else if (type == 3) {
-			int aux = (value & 0xFF) >> 4;
+			int aux = (address & 0xFF) >> 4;
 			if (aux <= 1) {
 				int segment = (address & 0xFF) << 12;
 				int offset = (address & 0xFFFF00) >> 8;
@@ -177,7 +213,7 @@ public class VM {
 				Register register = registers.get(aux);
 				if (register == null)
 					throw new Error("Register not found.");
-
+				
 				int logicAddress = register.getValue();
 				ram.setValue(logicAddress, value);
 			}
@@ -206,7 +242,7 @@ public class VM {
 			return registers.get(registerAddress).getValue(identifier);
 		}
 		if (type == 2) // inmediato
-			return value & 0xFFFF; // por las dudas
+			return ((value & 0xFFFF) << 16) >> 16; // por las dudas
 
 		// memoria
 		int aux = (value & 0xF0) >> 4;

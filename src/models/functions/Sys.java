@@ -28,19 +28,16 @@ public class Sys extends Mnemonic {
 
         if (code == 1) { // Read
             for (int i = 0; i < CL; i++) {
-                int fullData = Converter.stringToNumber(sc.nextLine(), AL);
-
-                for (int j = 0; j < CH; j++) {
-                    int data = (fullData >> ((CH - (j + 1)) * 8)) & 0xFF;
-                    int logicAddress = EDX.getValue() + i * CL + j;
-                    vm.ram.setValue(logicAddress, data, 1);
-                }
+                System.out.print(">>> ");
+                int data = Converter.stringToNumber(sc.nextLine(), AL);
+                int logicAddress = EDX.getValue() + i * CL;
+                vm.ram.setValue(logicAddress, data, CH);
             }
         } else if (code == 2) { // Write
             for (int i = 0; i < CL; i++) {
                 int logicAddress = EDX.getValue() + i * CL;
                 int value = vm.ram.getValue(logicAddress, CH);
-                System.out.println(Converter.numberToString(value, AL));
+                System.out.println(">>> " + Converter.numberToString(value, AL));
             }
         }
 

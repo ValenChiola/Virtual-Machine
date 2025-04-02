@@ -16,14 +16,20 @@ public class Register {
     }
 
     public int getValue(int identifier) {
-        if (identifier == 0)
-            return getValue();
-        else if (identifier == 1) // AL
-            return getValue() & 0xFF;
-        else if (identifier == 2) // AH
-            return (getValue() & 0xFF00) >> 8;
-        else // AX
-            return getValue() & 0xFFFF;
+        int value = getValue(); // Obtener el valor completo
+
+        if (identifier == 0) {
+            return value; // Retornar el valor completo
+        } else if (identifier == 1) { // AL (8 bits)
+            int al = value & 0xFF;
+            return (al << 24) >> 24; // Sin extensión de signo (AL siempre es positivo)
+        } else if (identifier == 2) { // AH (8 bits)
+            int ah = (value >> 8) & 0xFF; // Extraer AH
+            return (ah << 24) >> 24; // Extender signo (convertirlo en int de 32 bits)
+        } else { // AX (16 bits)
+            int ax = value & 0xFFFF; // Extraer AX
+            return (ax << 16) >> 16; // Extender signo (convertirlo en int de 32 bits)
+        }
     }
 
     public void setValue(int value) {

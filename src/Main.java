@@ -1,9 +1,12 @@
 import models.components.VM;
 
 public class Main {
-
 	public static void main(String[] args) {
-		new VM().start(args[0]);
+		try {
+			new VM().start(args[0]);
+		} catch (Exception e) {
+			System.err.println("Error: " + e.getMessage());
+			e.printStackTrace();
+		}
 	}
-
 }
