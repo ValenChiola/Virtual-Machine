@@ -7,8 +7,6 @@ public class TableSegments {
 
     private VM vm;
     private Map<Integer, Integer[]> table;
-    private int cs = 0;
-    private int ds = 1;
 
     public TableSegments(VM vm) {
         this.vm = vm;
@@ -16,28 +14,24 @@ public class TableSegments {
     }
 
     public void init(byte[] code) {
-        table.put(cs, new Integer[] { 0, code.length });
-        table.put(ds, new Integer[] { code.length, vm.ram.getCapacity() - code.length });
+        table.put(0, new Integer[] { 0, code.length });
+        table.put(1, new Integer[] { code.length, vm.ram.getCapacity() - code.length });
     }
 
     public int getBase(int segment) {
         return table.get(segment)[0];
     }
 
+    public int getBaseShifted(int segment) {
+        return getBase(segment) << 16;
+    }
+
     public int getSize(int segment) {
         return table.get(segment)[1];
     }
 
-    public int getCSKey() {
-        return cs;
-    }
-
-    public int getDSKey() {
-        return ds;
-    }
-
     public int getLimit() {
-        return getBase(ds) + getSize(ds);
+        return getBase(1) + getSize(1);
     }
 
 }

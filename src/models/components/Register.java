@@ -17,13 +17,13 @@ public class Register {
 
     public int getValue(int identifier) {
         if (identifier == 0)
-            return this.value;
+            return getValue();
         else if (identifier == 1) // AL
-            return this.value & 0xFF;
+            return getValue() & 0xFF;
         else if (identifier == 2) // AH
-            return (this.value & 0xFF00) >> 8;
+            return (getValue() & 0xFF00) >> 8;
         else // AX
-            return this.value & 0xFFFF;
+            return getValue() & 0xFFFF;
     }
 
     public void setValue(int value) {
@@ -35,12 +35,13 @@ public class Register {
             this.value = value;
         else if (identifier == 1)
             // AL
-            this.value = (this.value & 0xFFFFFF00) | (value & 0xFF);
+            this.value = (getValue() & 0xFFFFFF00) | (value & 0xFF);
         else if (identifier == 2)
             // AH
-            this.value = (this.value & 0xFFFF00FF) | ((value & 0xFF) << 8);
+           { this.value = (getValue() & 0xFFFF00FF) | ((value & 0xFF) << 8);
+        }
         else
             // AX
-            this.value = (this.value & 0xFFFF0000) | (value & 0xFFFF);
+            this.value = (getValue() & 0xFFFF0000) | (value & 0xFFFF);
     }
 }
