@@ -1,12 +1,11 @@
-package models.functions.J;
+package models.functions.jumps;
 
 import models.components.Register;
 import models.components.VM;
 import models.functions.Mnemonic;
 
-public class JZ extends Mnemonic {
-    
-    public JZ(VM vm) {
+public class JNN extends Mnemonic {
+    public JNN(VM vm){
       super(vm);
     }
 
@@ -17,8 +16,7 @@ public class JZ extends Mnemonic {
       Register CC = vm.registers.get(8);
       Register IP = vm.registers.get(5);
 
-      if (((CC.getValue() >>> 30) & 0x1) == 1)
+      if (CC.getValue() >>> 31 == 0)
         IP.setValue(0x00000000 + value);
     }
-
 }

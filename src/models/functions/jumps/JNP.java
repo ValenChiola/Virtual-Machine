@@ -1,22 +1,24 @@
-package models.functions.J;
+package models.functions.jumps;
 
 import models.components.Register;
 import models.components.VM;
 import models.functions.Mnemonic;
 
-public class JNN extends Mnemonic {
-  public JNN(VM vm){
-    super(vm);
-  }
+public class JNP extends Mnemonic {
 
-  @Override
+    public JNP(VM vm) {
+      super(vm);
+    }
+
+    @Override
     public void execute(int typeB, int B) {
       int value = vm.dataReadHandler(B, typeB);
 
       Register CC = vm.registers.get(8);
       Register IP = vm.registers.get(5);
 
-      if (CC.getValue() >>> 31 == 0)
+      if (((CC.getValue() >>> 31) & 0x1) == 1 || ((CC.getValue() >>> 30) & 0x1) == 1)
         IP.setValue(0x00000000 + value);
     }
+
 }

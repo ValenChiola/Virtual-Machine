@@ -40,6 +40,5 @@ public class Sys extends Mnemonic {
                 System.out.println(">>> " + Converter.numberToString(value, AL));
             }
         }
-
     }
 }

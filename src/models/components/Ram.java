@@ -30,8 +30,8 @@ public class Ram {
         int physicAddress = vm.processor.logicToPhysic(logicAddress);
         int data = 0;
         
-        for (int i = 0; i < bytesToRead; i++) 
-            data = (data << 8) | this.memory[physicAddress + i];
+        for (int i = 0; i < bytesToRead; i++)
+            data = (data << 8) | (this.memory[physicAddress + i] & 0xFF);
 
         return data;
     }
@@ -43,8 +43,8 @@ public class Ram {
     public void setValue(int logicAddress, int value, int bytesToWrite) {
         int physicAddress = vm.processor.logicToPhysic(logicAddress);
         for (int i = bytesToWrite - 1; i >= 0; i--){ 
-            this.memory[physicAddress + i] = (byte)(value & 0xFF);
-            value >>= 8;
+            this.memory[physicAddress + i] = (byte) (value & 0xFF);
+            value >>>= 8;
         }
     }
 }

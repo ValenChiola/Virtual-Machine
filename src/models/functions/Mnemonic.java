@@ -4,7 +4,7 @@ import models.components.VM;
 
 public abstract class Mnemonic {
 
-    protected VM vm;;
+    protected VM vm;
 
     public Mnemonic(VM vm) {
         this.vm = vm;
@@ -13,10 +13,8 @@ public abstract class Mnemonic {
     public void _execute(int typeA, int typeB, int A, int B) {
         if (typeA == 0 && typeB == 0)
             execute();
-
         else if (typeA == 0)
             execute(typeB, B);
-
         else
             execute(typeA, typeB, A, B);
     }

@@ -21,4 +21,5 @@ public class Swap extends Mnemonic{
       vm.dataWriteHandler(A, BValue, typeA);
       vm.dataWriteHandler(A, AValue, typeA);
     }
+    
 }
