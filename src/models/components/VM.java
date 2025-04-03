@@ -10,6 +10,7 @@ import models.functions.Ldh;
 import models.functions.Ldl;
 import models.functions.Mnemonic;
 import models.functions.Mov;
+import models.functions.Not;
 import models.functions.Rnd;
 import models.functions.Stop;
 import models.functions.Swap;
@@ -18,7 +19,6 @@ import models.functions.arithmetic.And;
 import models.functions.arithmetic.Cmp;
 import models.functions.arithmetic.Div;
 import models.functions.arithmetic.Mul;
-import models.functions.arithmetic.Not;
 import models.functions.arithmetic.Or;
 import models.functions.arithmetic.Shl;
 import models.functions.arithmetic.Shr;
@@ -208,12 +208,11 @@ public class VM {
 	private byte[] getCode(String pathname) throws IOException {
 		if (!pathname.endsWith(".vmx"))
 			throw new Error("File not supported");
-
 			
-			byte[] content = Files.readAllBytes(Paths.get(pathname));
-			int codeSize = (content[6] << 8) | content[7];
-			byte[] code = new byte[codeSize];
-			System.arraycopy(content, 8, code, 0, codeSize);
+		byte[] content = Files.readAllBytes(Paths.get(pathname));
+		int codeSize = (content[6] << 8) | content[7];
+		byte[] code = new byte[codeSize];
+		System.arraycopy(content, 8, code, 0, codeSize);
 			
 		System.out.println("--------------------------------");
 		// System.out.println("Header");

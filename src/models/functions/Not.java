@@ -1,6 +1,5 @@
-package models.functions.arithmetic;
+package models.functions;
 import models.components.VM;
-import models.functions.Mnemonic;
 
 public class Not extends Mnemonic {
 

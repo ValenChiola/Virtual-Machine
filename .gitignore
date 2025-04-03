@@ -2,5 +2,5 @@
 /.settings
 .classpath
 *.txt
-.asm
-.exe
+*.asm
+*.vmx
