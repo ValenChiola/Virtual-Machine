@@ -31,6 +31,7 @@ import models.functions.jumps.JNP;
 import models.functions.jumps.JNZ;
 import models.functions.jumps.JP;
 import models.functions.jumps.JZ;
+import utils.log.Log;
 import models.functions.Sys;
 
 public class VM {
@@ -74,8 +75,10 @@ public class VM {
 	private void execute(byte[] code) {
 		Register IP = registers.get(5);
 		int ii = 0;
+		
 		while (IP.getValue() < code.length) {
-			//System.out.println("======     ITERACIÓN " + (ii + 1) + "	  ======");
+			Log.debug("======     ITERACIÓN " + (ii + 1) + "	  ======");
+			
 			int IpValue = IP.getValue();
 
 			int instruction = ram.getValue(IpValue, 1);
@@ -95,12 +98,12 @@ public class VM {
 
 			IP.setValue(ts.getBaseShifted(0) | (IpValue + (ABytes + BBytes + 1))); // Segment | Offset
 
-			// System.out.println("Instruction: " + String.format("%8s ", Integer.toBinaryString(instruction & 0xFF)));
-			// System.out.println("Abytes: " + String.format("%2s ", Integer.toBinaryString(ABytes & 0x3)));
-			// System.out.println("A: " + String.format("%24s ", Integer.toBinaryString(A & 0xFFFFFF)));
-			// System.out.println("Bbytes: " + String.format("%2s ", Integer.toBinaryString(BBytes & 0x3)));
-			// System.out.println("B: " + String.format("%24s ", Integer.toBinaryString(B & 0xFFFFFF)));
-			//System.out.println("Operation: " + String.format("%02X ", operation));
+			Log.debug("Instruction: " + String.format("%8s ", Integer.toBinaryString(instruction & 0xFF)));
+			Log.debug("Abytes: " + String.format("%2s ", Integer.toBinaryString(ABytes & 0x3)));
+			Log.debug("A: " + String.format("%24s ", Integer.toBinaryString(A & 0xFFFFFF)));
+			Log.debug("Bbytes: " + String.format("%2s ", Integer.toBinaryString(BBytes & 0x3)));
+			Log.debug("B: " + String.format("%24s ", Integer.toBinaryString(B & 0xFFFFFF)));
+			Log.debug("Operation: " + String.format("%02X ", operation));
 
 			Mnemonic mnemonic = mnemonics.get(operation);
 
@@ -109,15 +112,10 @@ public class VM {
 
 			mnemonic._execute(ABytes, BBytes, A, B);
 
-			// System.out.println("CC: " + String.format("%32s ", Integer.toBinaryString(dataReadHandler(0X80, 1))));
-			// System.out.println("IP: " + String.format("%08X ", dataReadHandler(0x50, 1)));
-			// System.out.println("EAX: " + String.format("%08X ", dataReadHandler(0xA0, 1)));
-			// System.out.println("ECX: " + String.format("%08X ", dataReadHandler(0xC0, 1)));
-			// System.out.println("EDX: " + String.format("%08X ", dataReadHandler(0xD0, 1)));
-			// System.out.println("EFX: " + String.format("%08X ", dataReadHandler(0xF0, 1)));
-			// System.out.println("[0]/DS: " + String.format("%02X ", dataReadHandler(0x10, 3)));
-			// System.out.println("[4]: " + String.format("%02X ", dataReadHandler(0x410, 3)));
-			// System.out.println("====== FIN DE ITERACIÓN " + (ii + 1) + " ======");
+			printRegisters();	
+		
+			Log.debug("====== FIN DE ITERACIÓN " + (ii + 1) + " ======");
+
 			ii++;
 		}
 	}
@@ -272,6 +270,17 @@ public class VM {
 		mnemonics.put(0x1C, new Ldl(this));
 		mnemonics.put(0x1D, new Ldh(this));
 		mnemonics.put(0x1E, new Rnd(this));
+	}
+
+	private void printRegisters() {
+		Log.debug("CC: " + String.format("%32s ", Integer.toBinaryString(dataReadHandler(0X80, 1))));
+		Log.debug("IP: " + String.format("%08X ", dataReadHandler(0x50, 1)));
+		Log.debug("EAX: " + String.format("%08X ", dataReadHandler(0xA0, 1)));
+		Log.debug("ECX: " + String.format("%08X ", dataReadHandler(0xC0, 1)));
+		Log.debug("EDX: " + String.format("%08X ", dataReadHandler(0xD0, 1)));
+		Log.debug("EFX: " + String.format("%08X ", dataReadHandler(0xF0, 1)));
+		Log.debug("[0]/DS: " + String.format("%02X ", dataReadHandler(0x10, 3)));
+		Log.debug("[4]: " + String.format("%02X ", dataReadHandler(0x410, 3)));
 	}
 
 }

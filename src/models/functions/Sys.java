@@ -37,7 +37,7 @@ public class Sys extends Mnemonic {
             for (int i = 0; i < CL; i++) {
                 int logicAddress = EDX.getValue() + i * CL;
                 int value = vm.ram.getValue(logicAddress, CH);
-                System.out.println(">>> " + Converter.numberToString(value, AL));
+                System.out.println(Converter.numberToString(value, AL));
             }
         }
     }
