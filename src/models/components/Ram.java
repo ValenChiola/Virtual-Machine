@@ -23,10 +23,10 @@ public class Ram {
         return getValue(logicAddress, vm.bytesToAccess);
     }
 
-    public int getValue(int logicAddress, int bytesToRead) throws Exception{
+    public int getValue(int logicAddress, int bytesToRead) throws Exception {
         int physicAddress = vm.processor.logicToPhysic(logicAddress);
         int data = 0;
-        
+
         for (int i = 0; i < bytesToRead; i++)
             data = (data << 8) | (this.memory[physicAddress + i] & 0xFF);
 
@@ -39,7 +39,7 @@ public class Ram {
 
     public void setValue(int logicAddress, int value, int bytesToWrite) throws Exception {
         int physicAddress = vm.processor.logicToPhysic(logicAddress);
-        for (int i = bytesToWrite - 1; i >= 0; i--){ 
+        for (int i = bytesToWrite - 1; i >= 0; i--) {
             this.memory[physicAddress + i] = (byte) (value & 0xFF);
             value >>>= 8;
         }

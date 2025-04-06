@@ -1,4 +1,5 @@
 package models.functions;
+
 import models.components.VM;
 
 public class Not extends Mnemonic {

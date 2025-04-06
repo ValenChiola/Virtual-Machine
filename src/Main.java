@@ -13,7 +13,10 @@ public class Main {
 	}
 
 	static void parseArgs(String[] args) throws Exception {
-		if (args.length == 0) throw new Exception("File not found!");
-		if (args.length >= 2) Log.setLevel(args[1]);
+		if (args.length == 0)
+			throw new Exception("File not found!");
+
+		if (args.length >= 2)
+			Log.setLevel(args[1]);
 	}
 }

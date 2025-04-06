@@ -11,8 +11,8 @@ public class Stop extends Mnemonic {
 
     @Override
     public void execute() {
-       Register IP = vm.registers.get(5);
-       IP.setValue(0x00000000 + vm.ts.getSize(0));
+        Register IP = vm.registers.get(5);
+        IP.setValue(0x00000000 + vm.ts.getSize(0));
     }
-    
+
 }

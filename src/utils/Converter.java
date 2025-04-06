@@ -12,7 +12,7 @@ public class Converter {
         if (AL == 0x10)
             return Integer.parseInt(data, 2); // Binario
 
-        throw new Error("Converter failed");
+        throw new Error("Converter failed: no valid mode in AL");
     }
 
     public static String numberToString(int data, int AL) {
@@ -20,25 +20,25 @@ public class Converter {
 
         if ((AL & 0x10) != 0) // Binario
             result += "0b" + String.format("%s", Integer.toBinaryString(data & 0xFFFF)).replace(' ', '0') + " ";
-    
+
         if ((AL & 0x08) != 0) // Hexadecimal
             result += "0x" + String.format("%X", data & 0xFFFF) + " ";
-    
+
         if ((AL & 0x04) != 0) // Octal
             result += "0o" + Integer.toOctalString(data & 0xFFFF) + " ";
-    
+
         if ((AL & 0x02) != 0) { // Caracteres
-            char c1 = (char)((data >> 8) & 0xFF);
-            char c2 = (char)(data & 0xFF);
+            char c1 = (char) ((data >> 8) & 0xFF);
+            char c2 = (char) (data & 0xFF);
             result += "" + c1 + c2 + " ";
         }
-    
+
         if ((AL & 0x01) != 0) // Decimal
             result += data + " ";
-    
+
         if (result.isEmpty())
             throw new Error("Converter failed: no valid mode in AL");
-    
+
         return result.trim();
     }
 }

@@ -69,10 +69,10 @@ public class VM {
 	private void execute(byte[] code) throws Exception {
 		Register IP = registers.get(5);
 		int ii = 0;
-		
+
 		while (IP.getValue() < code.length) {
 			Log.debug("======     ITERACIÓN " + (ii + 1) + "	  ======");
-			
+
 			int IpValue = IP.getValue();
 
 			int instruction = ram.getValue(IpValue, 1);
@@ -106,15 +106,13 @@ public class VM {
 
 			mnemonic._execute(ABytes, BBytes, A, B);
 
-			printRegisters();	
-		
+			printRegisters();
+
 			Log.debug("====== FIN DE ITERACIÓN " + (ii + 1) + " ======");
 
 			ii++;
 		}
 	}
-
-	
 
 	/**
 	 * Handles writing data to a specific location based on the provided type.
@@ -126,7 +124,7 @@ public class VM {
 	 *                1 - Write to a register,
 	 *                2 - Immediate value (throws an error),
 	 *                3 - Write to memory.
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public void dataWriteHandler(int address, int value, int type) throws Exception {
 		if (type <= 0 || type >= 4)
@@ -151,7 +149,7 @@ public class VM {
 				Register register = registers.get(registerCode);
 				if (register == null)
 					throw new Exception("Register not found.");
-				
+
 				int logicAddress = register.getValue();
 				ram.setValue(logicAddress, value);
 			}
@@ -168,7 +166,7 @@ public class VM {
 	 *              2 - Immediate value,
 	 *              3 - Read from memory.
 	 * @return The data read from the specified location.
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public int dataReadHandler(int value, int type) throws Exception {
 		if (type <= 0 || type >= 4)
@@ -185,11 +183,11 @@ public class VM {
 
 		// memoria
 		int registerCode = (value & 0xF0) >> 4;
-		if (registerCode <= 1) {//acceder a memoria directamente
+		if (registerCode <= 1) {// acceder a memoria directamente
 			int segment = (value & 0xFF) << 12;
 			int offset = (value & 0xFFFF00) >> 8;
 			return ram.getValue(segment | offset);
-		} else { //puntero a memoria
+		} else { // puntero a memoria
 			Register register = registers.get(registerCode);
 			if (register == null)
 				throw new Exception("Register not found.");
@@ -200,12 +198,12 @@ public class VM {
 	}
 
 	private byte[] getCode(String pathname) throws Exception {
-		
+
 		if (!pathname.endsWith(".vmx"))
 			throw new Exception("File not supported");
 
 		byte[] content;
-		
+
 		try {
 			content = Files.readAllBytes(Paths.get(pathname));
 		} catch (IOException e) {
@@ -213,27 +211,27 @@ public class VM {
 		}
 
 		if (content.length == 0)
-		throw new Exception("File is empty or not found");
-		
+			throw new Exception("File is empty or not found");
+
 		int codeSize = (content[6] << 8) | content[7];
 		byte[] code = new byte[codeSize];
 		System.arraycopy(content, 8, code, 0, codeSize);
-		
+
 		System.out.println("--------------------------------");
 		// System.out.println("Header");
 		// for (int i = 0; i < 8; i++) {
-		// 	System.out.print(String.format("%02X ", content[i]));
+		// System.out.print(String.format("%02X ", content[i]));
 		// }
-		//System.out.println();
+		// System.out.println();
 		System.out.println("CS - CodeSize: " + codeSize);
 		for (int i = 0; i < codeSize; i++) {
 			System.out.print(String.format("%02X ", code[i]));
 		}
 		System.out.println();
 		System.out.println("--------------------------------");
-		
+
 		return code;
-		
+
 	}
 
 	private void registers() {

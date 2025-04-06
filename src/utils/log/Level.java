@@ -6,7 +6,6 @@ public enum Level {
     WARN,
     DEBUG;
 
-
     // Método para obtener el Level desde un String (como JavaScript)
     public static Level fromString(String name) {
         for (Level level : Level.values()) {

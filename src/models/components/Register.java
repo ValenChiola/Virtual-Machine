@@ -22,7 +22,7 @@ public class Register {
             return value; // Retornar el valor completo
         } else if (identifier == 1) { // AL (8 bits)
             int al = value & 0xFF;
-            return (al << 24) >> 24; // Sin extensión de signo (AL siempre es positivo)
+            return (al << 24) >> 24; // Extender signo (convertirlo en int de 32 bits)
         } else if (identifier == 2) { // AH (8 bits)
             int ah = (value >> 8) & 0xFF; // Extraer AH
             return (ah << 24) >> 24; // Extender signo (convertirlo en int de 32 bits)
@@ -39,15 +39,11 @@ public class Register {
     public void setValue(int value, int identifier) {
         if (identifier == 0)
             this.value = value;
-        else if (identifier == 1)
-            // AL
+        else if (identifier == 1) // AL
             this.value = (getValue() & 0xFFFFFF00) | (value & 0xFF);
-        else if (identifier == 2)
-            // AH
-           { this.value = (getValue() & 0xFFFF00FF) | ((value & 0xFF) << 8);
-        }
-        else
-            // AX
+        else if (identifier == 2) // AH
+            this.value = (getValue() & 0xFFFF00FF) | ((value & 0xFF) << 8);
+        else // AX
             this.value = (getValue() & 0xFFFF0000) | (value & 0xFFFF);
     }
 }

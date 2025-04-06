@@ -2,7 +2,7 @@ package models.functions.arithmetic;
 
 import models.components.VM;
 
-public class Or extends Arithmetic{
+public class Or extends Arithmetic {
     public Or(VM vm) {
         super(vm);
     }
