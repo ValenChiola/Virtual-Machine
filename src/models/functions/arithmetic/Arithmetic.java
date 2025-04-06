@@ -4,6 +4,8 @@ import models.components.VM;
 import models.functions.Mnemonic;
 
 public abstract class Arithmetic extends Mnemonic {
+  protected boolean overWritesA = true;
+
   public Arithmetic(VM vm) {
     super(vm);
   }
@@ -13,7 +15,8 @@ public abstract class Arithmetic extends Mnemonic {
     int AValue = vm.dataReadHandler(A, typeA);
     int BValue = vm.dataReadHandler(B, typeB);
     int result = getResult(AValue, BValue);
-    vm.dataWriteHandler(A, result, typeA);
+    if (overWritesA)
+      vm.dataWriteHandler(A, result, typeA);
     setCC(result);
   }
 
