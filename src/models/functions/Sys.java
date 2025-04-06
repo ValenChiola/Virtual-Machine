@@ -16,7 +16,7 @@ public class Sys extends Mnemonic {
     }
 
     @Override
-    public void execute(int typeB, int B) {
+    public void execute(int typeB, int B) throws Exception {
         int code = vm.dataReadHandler(B, typeB);
 
         Register EDX = vm.registers.get(13);
@@ -30,14 +30,14 @@ public class Sys extends Mnemonic {
             for (int i = 0; i < CL; i++) {
                 System.out.print(">>> ");
                 int data = Converter.stringToNumber(sc.nextLine(), AL);
-                int logicAddress = EDX.getValue() + i * CL;
+                int logicAddress = EDX.getValue() + i * CH;
                 vm.ram.setValue(logicAddress, data, CH);
             }
         } else if (code == 2) { // Write
             for (int i = 0; i < CL; i++) {
-                int logicAddress = EDX.getValue() + i * CL;
+                int logicAddress = EDX.getValue() + i * CH;
                 int value = vm.ram.getValue(logicAddress, CH);
-                System.out.println(Converter.numberToString(value, AL));
+                System.out.println("[" + (logicAddress & 0xFF) + "]" + ": " + Converter.numberToString(value, AL));
             }
         }
     }

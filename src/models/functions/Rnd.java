@@ -9,7 +9,7 @@ public class Rnd extends Mnemonic {
     }
     
     @Override
-    public void execute(int typeA, int typeB, int A, int B) {
+    public void execute(int typeA, int typeB, int A, int B) throws Exception {
       int BValue = vm.dataReadHandler(B, typeB);
       vm.dataWriteHandler(A, (int)(Math.random() + BValue), typeA);
     }

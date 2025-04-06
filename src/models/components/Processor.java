@@ -8,7 +8,7 @@ public class Processor {
         this.vm = vm;
     }
 
-    public int logicToPhysic(int logicAddress) {
+    public int logicToPhysic(int logicAddress) throws Exception {
         int segment = logicAddress >> 16;
         int offset = logicAddress & 0xFFFF;
 
@@ -16,11 +16,11 @@ public class Processor {
         int physicAddress = offset + DSBase;
 
         if (physicAddress < DSBase) // If I am in the CS
-            throw new Error("Out of bounds!");
+            throw new Exception("Out of bounds!");
 
         int DSLimit = vm.ts.getLimit(); // If I Pass the memory limit
         if (physicAddress + vm.bytesToAccess > DSLimit)
-            throw new Error("Out of bounds!");
+            throw new Exception("Out of bounds!");
 
         return physicAddress;
     }

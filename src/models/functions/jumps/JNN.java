@@ -10,7 +10,7 @@ public class JNN extends Mnemonic {
     }
 
     @Override
-    public void execute(int typeB, int B) {
+    public void execute(int typeB, int B) throws Exception {
       int value = vm.dataReadHandler(B, typeB);
 
       Register CC = vm.registers.get(8);

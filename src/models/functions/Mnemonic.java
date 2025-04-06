@@ -10,7 +10,7 @@ public abstract class Mnemonic {
         this.vm = vm;
     }
 
-    public void _execute(int typeA, int typeB, int A, int B) {
+    public void _execute(int typeA, int typeB, int A, int B) throws Exception {
         if (typeA == 0 && typeB == 0)
             execute();
         else if (typeA == 0)
@@ -19,15 +19,15 @@ public abstract class Mnemonic {
             execute(typeA, typeB, A, B);
     }
 
-    public void execute(int typeA, int typeB, int A, int B) {
+    public void execute(int typeA, int typeB, int A, int B) throws Exception {
         throw new IllegalArgumentException("Error de parámetros");
     }
 
-    public void execute(int typeB, int B) {
+    public void execute(int typeB, int B) throws Exception {
         throw new IllegalArgumentException("Error de parámetros");
     }
 
-    public void execute() {
+    public void execute() throws Exception {
         throw new IllegalArgumentException("Error de parámetros");
     }
 

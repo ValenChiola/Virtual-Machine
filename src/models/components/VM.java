@@ -53,26 +53,20 @@ public class VM {
 		mnemonics = new HashMap<>();
 	}
 
-	public void start(String pathname) {
-		try {
+	public void start(String pathname) throws Exception {
+		byte[] code = getCode(pathname);
 
-			byte[] code = getCode(pathname);
+		// Program loading :P
+		ts.init(code);
+		ram.init(code);
+		registers();
+		mnemonics();
 
-			// Program loading :P
-			ts.init(code);
-			ram.init(code);
-			registers();
-			mnemonics();
-
-			// Execute operations :/
-			execute(code);
-
-		} catch (IOException e) {
-			System.out.println(e.getMessage());
-		}
+		// Execute operations :/
+		execute(code);
 	}
 
-	private void execute(byte[] code) {
+	private void execute(byte[] code) throws Exception {
 		Register IP = registers.get(5);
 		int ii = 0;
 		
@@ -108,7 +102,7 @@ public class VM {
 			Mnemonic mnemonic = mnemonics.get(operation);
 
 			if (mnemonic == null)
-				throw new Error("Mnemonic " + operation + " not found :/");
+				throw new Exception("Mnemonic " + operation + " not found :/");
 
 			mnemonic._execute(ABytes, BBytes, A, B);
 
@@ -132,10 +126,11 @@ public class VM {
 	 *                1 - Write to a register,
 	 *                2 - Immediate value (throws an error),
 	 *                3 - Write to memory.
+	 * @throws Exception 
 	 */
-	public void dataWriteHandler(int address, int value, int type) {
+	public void dataWriteHandler(int address, int value, int type) throws Exception {
 		if (type <= 0 || type >= 4)
-			throw new Error("Estás haciendo cualquiera flaco.");
+			throw new Exception("Estás haciendo cualquiera flaco.");
 
 		else if (type == 1) {// Registro
 			int registerAddress = (address & 0xFF) >> 4;
@@ -144,18 +139,18 @@ public class VM {
 			int identifier = (address & 0xC) >> 2;
 			registers.get(registerAddress).setValue(value, identifier);
 		} else if (type == 2)
-			throw new Error("Estás haciendo cualquiera flaco."); // Inmediato
+			throw new Exception("Estás haciendo cualquiera flaco."); // Inmediato
 
 		else if (type == 3) {
 			int registerCode = (address & 0xFF) >> 4;
 			if (registerCode <= 1) {
 				int segment = (address & 0xFF) << 12;
 				int offset = (address & 0xFFFF00) >> 8;
-				ram.setValue(segment + offset, value);
+				ram.setValue(segment | offset, value);
 			} else {
 				Register register = registers.get(registerCode);
 				if (register == null)
-					throw new Error("Register not found.");
+					throw new Exception("Register not found.");
 				
 				int logicAddress = register.getValue();
 				ram.setValue(logicAddress, value);
@@ -173,10 +168,11 @@ public class VM {
 	 *              2 - Immediate value,
 	 *              3 - Read from memory.
 	 * @return The data read from the specified location.
+	 * @throws Exception 
 	 */
-	public int dataReadHandler(int value, int type) {
+	public int dataReadHandler(int value, int type) throws Exception {
 		if (type <= 0 || type >= 4)
-			throw new Error("Estás haciendo cualquiera flaco.");
+			throw new Exception("Estás haciendo cualquiera flaco.");
 
 		if (type == 1) { // registro
 			int registerAddress = (value & 0xFF) >> 4;
@@ -196,22 +192,33 @@ public class VM {
 		} else { //puntero a memoria
 			Register register = registers.get(registerCode);
 			if (register == null)
-				throw new Error("Register not found.");
+				throw new Exception("Register not found.");
 
 			int logicAddress = register.getValue();
 			return ram.getValue(logicAddress);
 		}
 	}
 
-	private byte[] getCode(String pathname) throws IOException {
+	private byte[] getCode(String pathname) throws Exception {
+		
 		if (!pathname.endsWith(".vmx"))
-			throw new Error("File not supported");
-			
-		byte[] content = Files.readAllBytes(Paths.get(pathname));
+			throw new Exception("File not supported");
+
+		byte[] content;
+		
+		try {
+			content = Files.readAllBytes(Paths.get(pathname));
+		} catch (IOException e) {
+			throw new Exception("File not found");
+		}
+
+		if (content.length == 0)
+		throw new Exception("File is empty or not found");
+		
 		int codeSize = (content[6] << 8) | content[7];
 		byte[] code = new byte[codeSize];
 		System.arraycopy(content, 8, code, 0, codeSize);
-			
+		
 		System.out.println("--------------------------------");
 		// System.out.println("Header");
 		// for (int i = 0; i < 8; i++) {
@@ -224,8 +231,9 @@ public class VM {
 		}
 		System.out.println();
 		System.out.println("--------------------------------");
-
+		
 		return code;
+		
 	}
 
 	private void registers() {
@@ -272,7 +280,7 @@ public class VM {
 		mnemonics.put(0x1E, new Rnd(this));
 	}
 
-	private void printRegisters() {
+	private void printRegisters() throws Exception {
 		Log.debug("CC: " + String.format("%32s ", Integer.toBinaryString(dataReadHandler(0X80, 1))));
 		Log.debug("IP: " + String.format("%08X ", dataReadHandler(0x50, 1)));
 		Log.debug("EAX: " + String.format("%08X ", dataReadHandler(0xA0, 1)));
@@ -280,7 +288,20 @@ public class VM {
 		Log.debug("EDX: " + String.format("%08X ", dataReadHandler(0xD0, 1)));
 		Log.debug("EFX: " + String.format("%08X ", dataReadHandler(0xF0, 1)));
 		Log.debug("[0]/DS: " + String.format("%02X ", dataReadHandler(0x10, 3)));
+		Log.debug("[1]: " + String.format("%02X ", dataReadHandler(0x110, 3)));
+		Log.debug("[2]: " + String.format("%02X ", dataReadHandler(0x210, 3)));
+		Log.debug("[3]: " + String.format("%02X ", dataReadHandler(0x310, 3)));
 		Log.debug("[4]: " + String.format("%02X ", dataReadHandler(0x410, 3)));
+		Log.debug("[5]: " + String.format("%02X ", dataReadHandler(0x510, 3)));
+		Log.debug("[6]: " + String.format("%02X ", dataReadHandler(0x610, 3)));
+		Log.debug("[7]: " + String.format("%02X ", dataReadHandler(0x710, 3)));
+		Log.debug("[8]: " + String.format("%02X ", dataReadHandler(0x810, 3)));
+		Log.debug("[9]: " + String.format("%02X ", dataReadHandler(0x910, 3)));
+		Log.debug("[10]: " + String.format("%02X ", dataReadHandler(0xA10, 3)));
+		Log.debug("[11]: " + String.format("%02X ", dataReadHandler(0xB10, 3)));
+		Log.debug("[12]: " + String.format("%02X ", dataReadHandler(0xC10, 3)));
+		Log.debug("[13]: " + String.format("%02X ", dataReadHandler(0xD10, 3)));
+		Log.debug("[14]: " + String.format("%02X ", dataReadHandler(0xE10, 3)));
 	}
 
 }

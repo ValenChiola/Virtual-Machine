@@ -9,7 +9,7 @@ public class Mov extends Mnemonic {
     }
 
     @Override
-    public void execute(int typeA, int typeB, int A, int B) {
+    public void execute(int typeA, int typeB, int A, int B) throws Exception {
         int value = vm.dataReadHandler(B, typeB);
         vm.dataWriteHandler(A, value, typeA);
     }

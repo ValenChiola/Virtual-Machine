@@ -9,7 +9,7 @@ public abstract class Arithmetic extends Mnemonic {
     }
 
     @Override
-    public void execute(int typeA, int typeB, int A, int B) {
+    public void execute(int typeA, int typeB, int A, int B) throws Exception {
       int AValue = vm.dataReadHandler(A, typeA);
       int BValue = vm.dataReadHandler(B, typeB);
       int result = getResult(AValue, BValue);

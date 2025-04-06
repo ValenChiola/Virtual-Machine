@@ -8,12 +8,12 @@ public class Swap extends Mnemonic{
     }
 
     @Override
-    public void execute(int typeA, int typeB, int A, int B) {
+    public void execute(int typeA, int typeB, int A, int B) throws Exception {
       if (typeB == 0 || typeB == 2)
-        throw new Error("Swap Error. B type incorrect");
+        throw new Exception("Swap Error. B type incorrect");
 
       if (typeA == 0 || typeA == 2)
-        throw new Error("Swap Error. A type incorrect");
+        throw new Exception("Swap Error. A type incorrect");
 
       int AValue = vm.dataReadHandler(A, typeA);
       int BValue = vm.dataReadHandler(B, typeB);
