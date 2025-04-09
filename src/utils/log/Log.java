@@ -27,7 +27,7 @@ public class Log {
 
     public static void debug(String message) {
         if (Level.DEBUG.ordinal() <= level.ordinal()) {
-            System.out.println(Colors.BLUE + "[DEBUG]: " + message + Colors.RESET);
+            System.out.println(Colors.CYAN + "[DEBUG]: " + message + Colors.RESET);
         }
     }
 
