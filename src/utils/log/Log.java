@@ -25,6 +25,12 @@ public class Log {
         }
     }
 
+    public static void dis(String message) {
+        if (Level.DIS.ordinal() <= level.ordinal()) {
+            System.out.println(Colors.WHITE + message + Colors.RESET);
+        }
+    }
+
     public static void debug(String message) {
         if (Level.DEBUG.ordinal() <= level.ordinal()) {
             System.out.println(Colors.CYAN + "[DEBUG]: " + message + Colors.RESET);

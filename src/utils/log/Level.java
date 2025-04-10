@@ -4,6 +4,7 @@ public enum Level {
     ERROR,
     INFO,
     WARN,
+    DIS,
     DEBUG;
 
     public static Level fromString(String name) {

@@ -1,14 +1,20 @@
 package models.components;
 
 public class Register {
+    private String name;
     private int value;
 
-    public Register(int value) {
+    public Register(String name, int value) {
+        this.name = name;
         this.value = value;
     }
 
+    public Register(String name) {
+        this(name, 0);
+    }
+
     public Register() {
-        this(0);
+        this("Unknown", 0);
     }
 
     public int getValue() {
@@ -30,6 +36,24 @@ public class Register {
             int ax = value & 0xFFFF; // Extraer AX
             return (ax << 16) >> 16; // Extender signo (convertirlo en int de 32 bits)
         }
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public String getName(int identifier) {
+        if (identifier == 0 || this.name.length() < 3) return this.name; // Retornar el valor completo
+        
+
+        if (identifier == 1)  // AL (8 bits)
+            return this.name.charAt(1) + "L"; // Extender signo (convertirlo en int de 32 bits)
+        
+        if (identifier == 2) // AH (8 bits)
+            return this.name.charAt(1) + "H"; // Extender signo (convertirlo en int de 32 bits)
+        
+        // AX (16 bits)
+        return this.name.substring(1);
     }
 
     public void setValue(int value) {

@@ -62,6 +62,7 @@ public class VM {
 		registers();
 		mnemonics();
 
+		disassembler(code);
 		// Execute operations :/
 		execute(code);
 	}
@@ -112,6 +113,89 @@ public class VM {
 
 			ii++;
 		}
+	}
+
+	private void disassembler(byte[] code) throws Exception {
+		Register IP = registers.get(5);
+
+		while (IP.getValue() < code.length) {
+			int IpValue = IP.getValue();
+
+			int instruction = ram.getValue(IpValue, 1);
+
+			int BBytes = ((instruction & 0xC0) >> 6);
+			int ABytes = ((instruction & 0x30) >> 4);
+			int operation = (instruction & 0x1F);
+
+			int B = 0;
+			int A = 0;
+
+			for (int i = 1; i < BBytes + 1; i++)
+				B = (B << 8) | ram.getValue(IpValue + i, 1) & 0xFFFFFF;
+
+			for (int i = 1; i < ABytes + 1; i++)
+				A = (A << 8) | ram.getValue(IpValue + BBytes + i, 1) & 0xFFFFFF;
+
+			IP.setValue(ts.getBaseShifted(0) | (IpValue + (ABytes + BBytes + 1))); // Segment | Offset
+
+			Mnemonic mnemonic = mnemonics.get(operation);
+
+			if (mnemonic == null)
+				throw new Exception("Mnemonic " + operation + " not found :/");
+
+			String BOperand = getDisassemblerOperand(BBytes, B);
+			String AOperand = getDisassemblerOperand(ABytes, A);
+
+			byte[] aux = new byte[(ABytes + BBytes + 1)];
+			System.arraycopy(code, IpValue, aux, 0, ((ABytes + BBytes + 1)));
+			String bytes = "";
+
+			for (byte b : aux)
+				bytes += String.format("%02X", b) + " ";
+
+			String firstPart = "[" + String.format("%04X", IpValue) + "] " + String.format(
+					"%-20s", bytes) + "\t|\t"
+					+ mnemonic.getName() + " ";
+
+			if (ABytes == 0 && BBytes == 0)
+				Log.dis(firstPart);
+			else if (ABytes == 0)
+				Log.dis(firstPart + "" + ((operation >= 0x01 && operation <= 0x07) ? "<" + String.format("%04X",
+						Integer.valueOf(BOperand)) + ">" : BOperand));
+			else
+				Log.dis(firstPart + AOperand + ", " + BOperand);
+
+		}
+		Log.dis("--------------------------------");
+
+		IP.setValue(0); // Restart
+	}
+
+	private String getDisassemblerOperand(int type, int value) {
+		if (type == 0 || type == 2) // Immediate
+			return "" + value;
+
+		if (type == 1) { // Register
+			int registerAddress = (value & 0xFF) >> 4;
+			int identifier = (value & 0xC) >> 2;
+			return registers.get(registerAddress).getName(identifier);
+		}
+
+		if (type == 3) {
+			int registerCode = (value & 0xF0) >> 4;
+			if (registerCode <= 1) {// acceder a memoria directamente
+				int offset = (value & 0xFFFF00) >> 8;
+				return "[" + offset + "]";
+			} else { // puntero a memoria
+				Register register = registers.get(registerCode);
+				if (register == null)
+					throw new Error("Register not found.");
+
+				return "[" + register.getName() + "]";
+			}
+		}
+
+		return "";
 	}
 
 	/**
@@ -213,7 +297,7 @@ public class VM {
 		if (content.length == 0)
 			throw new Exception("File is empty or not found");
 
-		int codeSize = (content[6] << 8) | content[7];
+		int codeSize = (content[6] << 8) | (((int) content[7] << 24) >>> 24);
 		byte[] code = new byte[codeSize];
 		System.arraycopy(content, 8, code, 0, codeSize);
 
@@ -236,17 +320,17 @@ public class VM {
 
 	private void registers() {
 		// Init registers :)
-		registers.put(0, new Register(0x00000000));
-		registers.put(1, new Register(0x00010000));// Dirección lógica hacia DS
-		registers.put(5, new Register(0x00000000));
-		registers.put(8, new Register());
-		registers.put(9, new Register());
-		registers.put(10, new Register());
-		registers.put(11, new Register());
-		registers.put(12, new Register());
-		registers.put(13, new Register());
-		registers.put(14, new Register());
-		registers.put(15, new Register());
+		registers.put(0, new Register("CS", 0x00000000));
+		registers.put(1, new Register("DS", 0x00010000));// Dirección lógica hacia DS
+		registers.put(5, new Register("IP", 0x00000000));
+		registers.put(8, new Register("CC"));
+		registers.put(9, new Register("AC"));
+		registers.put(10, new Register("EAX"));
+		registers.put(11, new Register("EBX"));
+		registers.put(12, new Register("ECX"));
+		registers.put(13, new Register("EDX"));
+		registers.put(14, new Register("EEX"));
+		registers.put(15, new Register("EFX"));
 	}
 
 	private void mnemonics() {

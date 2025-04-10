@@ -4,10 +4,13 @@ import models.components.VM;
 
 public abstract class Mnemonic {
 
+    protected String name;
     protected VM vm;
 
     public Mnemonic(VM vm) {
         this.vm = vm;
+        String[] aux = this.getClass().getName().toUpperCase().split("\\.");
+        this.name = aux[aux.length - 1];
     }
 
     public void _execute(int typeA, int typeB, int A, int B) throws Exception {
@@ -29,6 +32,10 @@ public abstract class Mnemonic {
 
     public void execute() throws Exception {
         throw new IllegalArgumentException("Error de parámetros");
+    }
+
+    public String getName() {
+        return this.name;
     }
 
 }
