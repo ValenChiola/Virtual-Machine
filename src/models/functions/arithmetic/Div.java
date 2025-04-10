@@ -14,4 +14,9 @@ public class Div extends Arithmetic {
 
     return AValue / BValue;
   }
+
+  @Override
+  protected void afterWrite(int AValue, int BValue, int result) {
+    vm.registers.get(9).setValue(AValue % BValue); // Set in AC the modulo
+  }
 }

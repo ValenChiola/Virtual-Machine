@@ -178,7 +178,12 @@ public class VM {
 		if (type == 1) { // Register
 			int registerAddress = (value & 0xFF) >> 4;
 			int identifier = (value & 0xC) >> 2;
-			return registers.get(registerAddress).getName(identifier);
+
+			Register register = registers.get(registerAddress);
+			if (register == null)
+				throw new Error("Register not found.");
+
+			return register.getName(identifier);
 		}
 
 		if (type == 3) {

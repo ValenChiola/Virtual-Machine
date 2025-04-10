@@ -18,6 +18,7 @@ public abstract class Arithmetic extends Mnemonic {
     if (overWritesA)
       vm.dataWriteHandler(A, result, typeA);
     setCC(result);
+    afterWrite(AValue, BValue, result);
   }
 
   protected abstract int getResult(int AValue, int BValue);
@@ -34,6 +35,10 @@ public abstract class Arithmetic extends Mnemonic {
     result <<= 30;
 
     vm.registers.get(8).setValue(result);
+  }
+
+  protected void afterWrite(int AValue, int BValue, int result) {
+    // No operation
   }
 
 }
