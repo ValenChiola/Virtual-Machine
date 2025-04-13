@@ -199,7 +199,6 @@ public class VM {
 				return "[" + register.getName() + "]";
 			}
 		}
-
 		return "";
 	}
 
