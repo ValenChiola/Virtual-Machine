@@ -9,8 +9,7 @@ public abstract class Mnemonic {
 
     public Mnemonic(VM vm) {
         this.vm = vm;
-        String[] aux = this.getClass().getName().toUpperCase().split("\\.");
-        this.name = aux[aux.length - 1];
+        this.name = this.getClass().getSimpleName().toUpperCase();
     }
 
     public void _execute(int typeA, int typeB, int A, int B) throws Exception {

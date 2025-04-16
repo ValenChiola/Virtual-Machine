@@ -306,16 +306,7 @@ public class VM {
 		System.arraycopy(content, 8, code, 0, codeSize);
 
 		System.out.println("--------------------------------");
-		// System.out.println("Header");
-		// for (int i = 0; i < 8; i++) {
-		// System.out.print(String.format("%02X ", content[i]));
-		// }
-		// System.out.println();
-		System.out.println("CS - CodeSize: " + codeSize);
-		for (int i = 0; i < codeSize; i++) {
-			System.out.print(String.format("%02X ", code[i]));
-		}
-		System.out.println();
+		System.out.println("CodeSize: " + codeSize);
 		System.out.println("--------------------------------");
 
 		return code;
