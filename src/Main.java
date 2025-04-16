@@ -8,6 +8,7 @@ public class Main {
 			parseArgs(args);
 			new VM().start(args[0]);
 		} catch (Exception e) {
+			e.printStackTrace();
 			System.out.println(e.getMessage());
 		}
 	}
