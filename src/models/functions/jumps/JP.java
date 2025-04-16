@@ -17,7 +17,7 @@ public class JP extends Mnemonic {
     Register CC = vm.registers.get(8);
     Register IP = vm.registers.get(5);
 
-    if (((CC.getValue() >>> 31) & 0x1) == 0)
+    if (((CC.getValue() >>> 31) & 0x1) == 0 && ((CC.getValue() >>> 30) & 0x1) == 0)
       IP.setValue(0x00000000 + value);
   }
 
