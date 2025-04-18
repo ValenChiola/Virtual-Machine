@@ -4,3 +4,4 @@
 *.txt
 *.asm
 *.vmx
+/build

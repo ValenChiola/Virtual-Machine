@@ -1,0 +1,39 @@
+
+plugins {
+    // Plugin de Java y de aplicación para facilitar ejecución
+    id 'java'
+    id 'application'
+}
+
+java {
+    // Opcional: forzar versión de Java (ajústalo según tu JDK)
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+application {
+    // Indica la clase que contiene tu método main()
+    // Si tu Main.java no tiene paquete, basta con 'Main'
+    mainClass = 'Main'
+}
+
+repositories {
+    // Repositorio central para dependencias
+    mavenCentral()
+}
+
+dependencies {
+    // Aquí defines librerías externas (si las hay).  
+    // Ejemplo: implementation 'com.google.guava:guava:31.1-jre'
+    testImplementation 'junit:junit:4.13.2'
+}
+
+// Si tu carpeta de fuentes no está en src/main/java,
+// puedes redefinirla así (no necesario si usas convenciones):
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src']
+        }
+    }
+}
