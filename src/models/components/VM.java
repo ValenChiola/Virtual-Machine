@@ -360,6 +360,7 @@ public class VM {
 	private void printRegisters() throws Exception {
 		Log.debug("CC: " + String.format("%32s ", Integer.toBinaryString(dataReadHandler(0X80, 1))));
 		Log.debug("IP: " + String.format("%08X ", dataReadHandler(0x50, 1)));
+		Log.debug("AC: " + String.format("%08X ", dataReadHandler(0x90, 1)));
 		Log.debug("EAX: " + String.format("%08X ", dataReadHandler(0xA0, 1)));
 		Log.debug("ECX: " + String.format("%08X ", dataReadHandler(0xC0, 1)));
 		Log.debug("EDX: " + String.format("%08X ", dataReadHandler(0xD0, 1)));
