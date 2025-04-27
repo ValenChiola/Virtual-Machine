@@ -141,32 +141,33 @@ public class VM {
 			Mnemonic mnemonic = mnemonics.get(operation);
 
 			if (mnemonic == null)
-				throw new Exception("Mnemonic " + operation + " not found :/");
+				Log.dis("Mnemonic " + operation + " not found :/");
+			else {
+				String BOperand = getDisassemblerOperand(BBytes, B);
+				String AOperand = getDisassemblerOperand(ABytes, A);
 
-			String BOperand = getDisassemblerOperand(BBytes, B);
-			String AOperand = getDisassemblerOperand(ABytes, A);
+				byte[] aux = new byte[(ABytes + BBytes + 1)];
+				System.arraycopy(code, IpValue, aux, 0, ((ABytes + BBytes + 1)));
+				String bytes = "";
 
-			byte[] aux = new byte[(ABytes + BBytes + 1)];
-			System.arraycopy(code, IpValue, aux, 0, ((ABytes + BBytes + 1)));
-			String bytes = "";
+				for (byte b : aux)
+					bytes += String.format("%02X", b) + " ";
 
-			for (byte b : aux)
-				bytes += String.format("%02X", b) + " ";
+				String firstPart = "[" + String.format("%04X", IpValue) + "] " + String.format(
+						"%-20s", bytes) + "\t|\t"
+						+ mnemonic.getName() + " ";
 
-			String firstPart = "[" + String.format("%04X", IpValue) + "] " + String.format(
-					"%-20s", bytes) + "\t|\t"
-					+ mnemonic.getName() + " ";
-
-			if (ABytes == 0 && BBytes == 0)
-				Log.dis(firstPart);
-			else if (ABytes == 0)
-				Log.dis(firstPart + ""
-						+ ((operation >= 0x01 && operation <= 0x07)
-								? "<" + String.format("%04X",
-										Integer.valueOf(BOperand)) + ">"
-								: BOperand));
-			else
-				Log.dis(firstPart + AOperand + ", " + BOperand);
+				if (ABytes == 0 && BBytes == 0)
+					Log.dis(firstPart);
+				else if (ABytes == 0)
+					Log.dis(firstPart + ""
+							+ ((operation >= 0x01 && operation <= 0x07)
+									? "<" + String.format("%04X",
+											Integer.valueOf(BOperand)) + ">"
+									: BOperand));
+				else
+					Log.dis(firstPart + AOperand + ", " + BOperand);
+			}
 
 		}
 		Log.dis("--------------------------------");

@@ -19,7 +19,7 @@ public class Swap extends Mnemonic {
     int BValue = vm.dataReadHandler(B, typeB);
 
     vm.dataWriteHandler(A, BValue, typeA);
-    vm.dataWriteHandler(A, AValue, typeA);
+    vm.dataWriteHandler(B, AValue, typeB);
   }
 
 }
