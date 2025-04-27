@@ -160,8 +160,11 @@ public class VM {
 			if (ABytes == 0 && BBytes == 0)
 				Log.dis(firstPart);
 			else if (ABytes == 0)
-				Log.dis(firstPart + "" + ((operation >= 0x01 && operation <= 0x07) ? "<" + String.format("%04X",
-						Integer.valueOf(BOperand)) + ">" : BOperand));
+				Log.dis(firstPart + ""
+						+ ((operation >= 0x01 && operation <= 0x07)
+								? "<" + String.format("%04X",
+										Integer.valueOf(BOperand)) + ">"
+								: BOperand));
 			else
 				Log.dis(firstPart + AOperand + ", " + BOperand);
 
