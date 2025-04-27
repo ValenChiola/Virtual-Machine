@@ -1,7 +1,7 @@
 package utils.log;
 
 public class Log {
-    private static Level level = Level.INFO;
+    public static Level level = Level.INFO;
 
     public static void setLevel(String level) {
         Log.level = Level.fromString(level);

@@ -31,6 +31,7 @@ import models.functions.jumps.JNP;
 import models.functions.jumps.JNZ;
 import models.functions.jumps.JP;
 import models.functions.jumps.JZ;
+import utils.log.Level;
 import utils.log.Log;
 import models.functions.Sys;
 
@@ -61,8 +62,8 @@ public class VM {
 		ram.init(code);
 		registers();
 		mnemonics();
-
-		disassembler(code);
+		if (Log.level == Level.DIS)
+			disassembler(code);
 		// Execute operations :/
 		execute(code);
 	}
