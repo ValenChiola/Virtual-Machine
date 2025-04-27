@@ -30,7 +30,7 @@ public class Converter {
         if ((AL & 0x02) != 0) { // Caracteres
             char c1 = (char) ((data >> 8) & 0xFF);
             char c2 = (char) (data & 0xFF);
-            if (c2 >= 31 || c2 == 127)
+            if (c2 <= 31 || c2 == 127)
                 result += ". ";
             else
                 result += "" + c1 + c2 + " ";
