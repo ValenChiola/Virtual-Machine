@@ -5,4 +5,5 @@
 *.asm
 *.vmx
 /build
+*.jar
 .gradle
