@@ -19,21 +19,30 @@ public class Converter {
         String result = "";
 
         if ((AL & 0x10) != 0) // Binario
-            result += "0b" + String.format("%s", Integer.toBinaryString(data & 0xFFFF)).replace(' ', '0') + " ";
+            result += "0b" + Integer.toBinaryString(data).replace(' ', '0') + " ";
 
         if ((AL & 0x08) != 0) // Hexadecimal
-            result += "0x" + String.format("%X", data & 0xFFFF) + " ";
+            result += "0x" + Integer.toHexString(data).toUpperCase().replace(' ', '0') + " ";
 
         if ((AL & 0x04) != 0) // Octal
-            result += "0o" + Integer.toOctalString(data & 0xFFFF) + " ";
+            result += "0o" + Integer.toOctalString(data).replace(' ', '0') + " ";
 
         if ((AL & 0x02) != 0) { // Caracteres
-            char c1 = (char) ((data >> 8) & 0xFF);
-            char c2 = (char) (data & 0xFF);
-            if (c2 <= 31 || c2 == 127)
-                result += ". ";
-            else
-                result += "" + c1 + c2 + " ";
+            char c1 = (char) (data & 0xFF);
+            char c2 = (char) ((data >> 8) & 0xFF);
+            char c3 = (char) ((data >> 16) & 0xFF);
+            char c4 = (char) ((data >> 24) & 0xFF);
+
+            if (c1 <= 31 || c1 >= 127)
+                c1 = '.';
+            if (c2 <= 31 || c2 >= 127)
+                c2 = '.';
+            if (c3 <= 31 || c3 >= 127)
+                c3 = '.';
+            if (c4 <= 31 || c4 >= 127)
+                c4 = '.';
+
+            result += "" + c4 + c3 + c2 + c1 + " ";
         }
 
         if ((AL & 0x01) != 0) // Decimal
