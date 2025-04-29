@@ -5,19 +5,23 @@ OUT_DIR="bin"
 MAIN_CLASS="Main"
 JAR_NAME="vm.jar"
 
-echo "🧹 Limpiando compilación anterior..."
-rm -rf "$OUT_DIR"
-mkdir -p "$OUT_DIR"
-rm -f "$JAR_NAME"
+if [ "$JAR_NAME" -nt "$(find "$SRC_DIR" -name "*.java")" ]; then
+    echo "✅ No hay cambios, usando versión compilada existente"
+else
+    echo "🧹 Limpiando compilación anterior..."
+    rm -rf "$OUT_DIR"
+    mkdir -p "$OUT_DIR"
+    rm -f "$JAR_NAME"
 
-echo "🔨 Compilando archivos .java..."
-find "$SRC_DIR" -name "*.java" > sources.txt
-javac -d "$OUT_DIR" @sources.txt
+    echo "🔨 Compilando archivos .java..."
+    find "$SRC_DIR" -name "*.java" > sources.txt
+    javac -d "$OUT_DIR" @sources.txt
 
-echo "📦 Generando $JAR_NAME..."
-jar cfe "$JAR_NAME" "$MAIN_CLASS" -C "$OUT_DIR" .
+    echo "📦 Generando $JAR_NAME..."
+    jar cfe "$JAR_NAME" "$MAIN_CLASS" -C "$OUT_DIR" .
+fi
 
 echo "🚀 Ejecutando $JAR_NAME..."
 java -jar "$JAR_NAME" "$@"
 
-rm sources.txt
+rm sources.txt > /dev/null 2>&1
