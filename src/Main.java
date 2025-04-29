@@ -1,5 +1,8 @@
+import models.components.Processor;
 import models.components.Ram;
+import models.components.TableSegments;
 import models.components.VM;
+import utils.ArgsParser;
 import utils.log.Log;
 
 public class Main {
@@ -7,25 +10,21 @@ public class Main {
 	public static void main(String[] args) {
 
 		try {
-			parseArgs(args);
 
-			new VM(args[0])
-					.ram(new Ram(16384))
+			ArgsParser.build(args);
+
+			Log.debug(ArgsParser.getInstance().toString());
+
+			new VM(ArgsParser.getVmxFile())
+					.ram(new Ram(ArgsParser.getMemory()))
+					.processor(new Processor())
+					.ts(new TableSegments())
 					.build()
 					.start();
 
-			// new VM().start(args[0]);
 		} catch (Exception e) {
-			e.printStackTrace();
 			System.out.println(e.getMessage());
 		}
 	}
 
-	static void parseArgs(String[] args) throws Exception {
-		if (args.length == 0)
-			throw new Exception("File not found!");
-
-		if (args.length >= 2)
-			Log.setLevel(args[1]);
-	}
 }

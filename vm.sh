@@ -18,6 +18,6 @@ echo "📦 Generando $JAR_NAME..."
 jar cfe "$JAR_NAME" "$MAIN_CLASS" -C "$OUT_DIR" .
 
 echo "🚀 Ejecutando $JAR_NAME..."
-java -jar "$JAR_NAME" $1 $2
+java -jar "$JAR_NAME" "$@"
 
 rm sources.txt

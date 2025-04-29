@@ -1,7 +1,9 @@
 package utils.log;
 
+import utils.ArgsParser;
+
 public class Log {
-    public static Level level = Level.INFO;
+    public static Level level = Level.fromString(ArgsParser.getLogLevel());
 
     public static void setLevel(String level) {
         Log.level = Level.fromString(level);
@@ -22,12 +24,6 @@ public class Log {
     public static void info(String message) {
         if (Level.INFO.ordinal() <= level.ordinal()) {
             System.out.println(Colors.GREEN + "[INFO]: " + message + Colors.RESET);
-        }
-    }
-
-    public static void dis(String message) {
-        if (Level.DIS.ordinal() <= level.ordinal()) {
-            System.out.println(Colors.WHITE + message + Colors.RESET);
         }
     }
 

@@ -14,6 +14,7 @@ import models.functions.Not;
 import models.functions.Rnd;
 import models.functions.Stop;
 import models.functions.Swap;
+import models.functions.Sys;
 import models.functions.arithmetic.Add;
 import models.functions.arithmetic.And;
 import models.functions.arithmetic.Cmp;
@@ -31,9 +32,8 @@ import models.functions.jumps.JNP;
 import models.functions.jumps.JNZ;
 import models.functions.jumps.JP;
 import models.functions.jumps.JZ;
-import utils.log.Level;
+import utils.ArgsParser;
 import utils.log.Log;
-import models.functions.Sys;
 
 public class VM {
 	final int architecture = 32; // in bits
@@ -50,14 +50,21 @@ public class VM {
 	private static VM instace;
 
 	public VM(String pathname) throws Exception {
-		this.ram = new Ram(16384);
-		this.ts = new TableSegments();
-		this.processor = new Processor();
 		this.code = getCode(pathname);
 	}
 
 	public VM ram(Ram ram) {
 		this.ram = ram;
+		return this;
+	}
+
+	public VM ts(TableSegments ts) {
+		this.ts = ts;
+		return this;
+	}
+
+	public VM processor(Processor processor) {
+		this.processor = processor;
 		return this;
 	}
 
@@ -78,7 +85,7 @@ public class VM {
 
 	public void start() throws Exception {
 
-		if (Log.level == Level.DIS)
+		if (ArgsParser.isDissasemblerEnabled())
 			disassembler(code);
 
 		execute(code);
@@ -159,7 +166,7 @@ public class VM {
 			Mnemonic mnemonic = mnemonics.get(operation);
 
 			if (mnemonic == null)
-				Log.dis("Mnemonic " + operation + " not found :/");
+				System.out.println("Mnemonic " + operation + " not found :/");
 			else {
 				String BOperand = getDisassemblerOperand(BBytes, B);
 				String AOperand = getDisassemblerOperand(ABytes, A);
@@ -176,19 +183,19 @@ public class VM {
 						+ mnemonic.getName() + " ";
 
 				if (ABytes == 0 && BBytes == 0)
-					Log.dis(firstPart);
+					System.out.println(firstPart);
 				else if (ABytes == 0)
-					Log.dis(firstPart + ""
+					System.out.println(firstPart + ""
 							+ ((operation >= 0x01 && operation <= 0x07) // Jumps
 									? "<" + String.format("%04X",
 											Integer.valueOf(BOperand)) + ">"
 									: BOperand));
 				else
-					Log.dis(firstPart + AOperand + ", " + BOperand);
+					System.out.println(firstPart + AOperand + ", " + BOperand);
 			}
 
 		}
-		Log.dis("--------------------------------");
+		System.out.println("--------------------------------");
 
 		IP.setValue(0); // Restart
 	}
