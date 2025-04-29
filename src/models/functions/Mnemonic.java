@@ -1,14 +1,10 @@
 package models.functions;
 
-import models.components.VM;
-
 public abstract class Mnemonic {
 
     protected String name;
-    protected VM vm;
 
-    public Mnemonic(VM vm) {
-        this.vm = vm;
+    public Mnemonic() {
         this.name = this.getClass().getSimpleName().toUpperCase();
     }
 

@@ -6,12 +6,14 @@ import models.functions.Mnemonic;
 public abstract class Arithmetic extends Mnemonic {
   protected boolean overWritesA = true;
 
-  public Arithmetic(VM vm) {
-    super(vm);
+  public Arithmetic() {
+    super();
   }
 
   @Override
   public void execute(int typeA, int typeB, int A, int B) throws Exception {
+    VM vm = VM.getInstance();
+
     int AValue = vm.dataReadHandler(A, typeA);
     int BValue = vm.dataReadHandler(B, typeB);
     int result = getResult(AValue, BValue);
@@ -34,11 +36,11 @@ public abstract class Arithmetic extends Mnemonic {
 
     result <<= 30;
 
-    vm.registers.get(8).setValue(result);
+    VM.getInstance().registers.get(8).setValue(result);
   }
 
   protected void afterWrite(int AValue, int BValue, int result) {
-    // No operation
+    // Default implementation does nothing
   }
 
 }

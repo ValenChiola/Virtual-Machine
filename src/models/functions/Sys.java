@@ -10,13 +10,15 @@ public class Sys extends Mnemonic {
 
     Scanner sc;
 
-    public Sys(VM vm) {
-        super(vm);
+    public Sys() {
+        super();
         sc = new Scanner(System.in);
     }
 
     @Override
     public void execute(int typeB, int B) throws Exception {
+        VM vm = VM.getInstance();
+
         int code = vm.dataReadHandler(B, typeB);
 
         Register EDX = vm.registers.get(13);

@@ -45,27 +45,44 @@ public class VM {
 	public Processor processor;
 	public Map<Integer, Register> registers;
 	public Map<Integer, Mnemonic> mnemonics;
+	byte[] code;
 
-	public VM() {
-		ram = new Ram(this);
-		ts = new TableSegments(this);
-		processor = new Processor(this);
-		registers = new HashMap<>();
-		mnemonics = new HashMap<>();
+	private static VM instace;
+
+	public VM(String pathname) throws Exception {
+		this.ram = new Ram(16384);
+		this.ts = new TableSegments();
+		this.processor = new Processor();
+		this.code = getCode(pathname);
 	}
 
-	public void start(String pathname) throws Exception {
-		byte[] code = getCode(pathname);
+	public VM ram(Ram ram) {
+		this.ram = ram;
+		return this;
+	}
 
-		// Program loading :P
-		ts.init(code);
-		ram.init(code);
+	public VM build() {
+		VM.instace = this;
+
+		ts.init(this.code);
+		ram.init(this.code);
 		registers();
 		mnemonics();
+
+		return this;
+	}
+
+	public static VM getInstance() {
+		return instace;
+	}
+
+	public void start() throws Exception {
+
 		if (Log.level == Level.DIS)
 			disassembler(code);
-		// Execute operations :/
+
 		execute(code);
+
 	}
 
 	private void execute(byte[] code) throws Exception {
@@ -162,7 +179,7 @@ public class VM {
 					Log.dis(firstPart);
 				else if (ABytes == 0)
 					Log.dis(firstPart + ""
-							+ ((operation >= 0x01 && operation <= 0x07)
+							+ ((operation >= 0x01 && operation <= 0x07) // Jumps
 									? "<" + String.format("%04X",
 											Integer.valueOf(BOperand)) + ">"
 									: BOperand));
@@ -319,9 +336,9 @@ public class VM {
 	}
 
 	private void registers() {
-		// Init registers :)
+		registers = new HashMap<>();
 		registers.put(0, new Register("CS", 0x00000000));
-		registers.put(1, new Register("DS", 0x00010000));// Dirección lógica hacia DS
+		registers.put(1, new Register("DS", 0x00010000));
 		registers.put(5, new Register("IP", 0x00000000));
 		registers.put(8, new Register("CC"));
 		registers.put(9, new Register("AC"));
@@ -334,32 +351,32 @@ public class VM {
 	}
 
 	private void mnemonics() {
-		// Init Mnemonics :o
-		mnemonics.put(0x00, new Sys(this));
-		mnemonics.put(0x01, new JMP(this));
-		mnemonics.put(0x02, new JZ(this));
-		mnemonics.put(0x03, new JP(this));
-		mnemonics.put(0x04, new JN(this));
-		mnemonics.put(0x05, new JNZ(this));
-		mnemonics.put(0x06, new JNP(this));
-		mnemonics.put(0x07, new JNN(this));
-		mnemonics.put(0x08, new Not(this));
-		mnemonics.put(0x0F, new Stop(this));
-		mnemonics.put(0x10, new Mov(this));
-		mnemonics.put(0x11, new Add(this));
-		mnemonics.put(0x12, new Sub(this));
-		mnemonics.put(0x13, new Swap(this));
-		mnemonics.put(0x14, new Mul(this));
-		mnemonics.put(0x15, new Div(this));
-		mnemonics.put(0x16, new Cmp(this));
-		mnemonics.put(0x17, new Shl(this));
-		mnemonics.put(0x18, new Shr(this));
-		mnemonics.put(0x19, new And(this));
-		mnemonics.put(0x1A, new Or(this));
-		mnemonics.put(0x1B, new Xor(this));
-		mnemonics.put(0x1C, new Ldl(this));
-		mnemonics.put(0x1D, new Ldh(this));
-		mnemonics.put(0x1E, new Rnd(this));
+		mnemonics = new HashMap<>();
+		mnemonics.put(0x00, new Sys());
+		mnemonics.put(0x01, new JMP());
+		mnemonics.put(0x02, new JZ());
+		mnemonics.put(0x03, new JP());
+		mnemonics.put(0x04, new JN());
+		mnemonics.put(0x05, new JNZ());
+		mnemonics.put(0x06, new JNP());
+		mnemonics.put(0x07, new JNN());
+		mnemonics.put(0x08, new Not());
+		mnemonics.put(0x0F, new Stop());
+		mnemonics.put(0x10, new Mov());
+		mnemonics.put(0x11, new Add());
+		mnemonics.put(0x12, new Sub());
+		mnemonics.put(0x13, new Swap());
+		mnemonics.put(0x14, new Mul());
+		mnemonics.put(0x15, new Div());
+		mnemonics.put(0x16, new Cmp());
+		mnemonics.put(0x17, new Shl());
+		mnemonics.put(0x18, new Shr());
+		mnemonics.put(0x19, new And());
+		mnemonics.put(0x1A, new Or());
+		mnemonics.put(0x1B, new Xor());
+		mnemonics.put(0x1C, new Ldl());
+		mnemonics.put(0x1D, new Ldh());
+		mnemonics.put(0x1E, new Rnd());
 	}
 
 	private void printRegisters() throws Exception {

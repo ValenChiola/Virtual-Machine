@@ -2,13 +2,9 @@ package models.components;
 
 public class Processor {
 
-    private VM vm;
-
-    public Processor(VM vm) {
-        this.vm = vm;
-    }
-
     public int logicToPhysic(int logicAddress) throws Exception {
+        VM vm = VM.getInstance();
+
         int segment = logicAddress >> 16;
         int offset = logicAddress & 0xFFFF;
 

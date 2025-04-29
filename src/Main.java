@@ -1,12 +1,20 @@
+import models.components.Ram;
 import models.components.VM;
 import utils.log.Log;
 
 public class Main {
 
 	public static void main(String[] args) {
+
 		try {
 			parseArgs(args);
-			new VM().start(args[0]);
+
+			new VM(args[0])
+					.ram(new Ram(16384))
+					.build()
+					.start();
+
+			// new VM().start(args[0]);
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println(e.getMessage());

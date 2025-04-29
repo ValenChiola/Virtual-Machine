@@ -3,8 +3,8 @@ package models.functions;
 import models.components.VM;
 
 public class Swap extends Mnemonic {
-  public Swap(VM vm) {
-    super(vm);
+  public Swap() {
+    super();
   }
 
   @Override
@@ -14,6 +14,8 @@ public class Swap extends Mnemonic {
 
     if (typeA == 0 || typeA == 2)
       throw new Exception("Swap Error. A type incorrect");
+
+    VM vm = VM.getInstance();
 
     int AValue = vm.dataReadHandler(A, typeA);
     int BValue = vm.dataReadHandler(B, typeB);

@@ -1,10 +1,8 @@
 package models.functions.arithmetic;
 
-import models.components.VM;
-
 public class And extends Arithmetic {
-    public And(VM vm) {
-        super(vm);
+    public And() {
+        super();
     }
 
     @Override

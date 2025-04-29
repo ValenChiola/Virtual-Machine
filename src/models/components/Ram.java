@@ -1,17 +1,20 @@
 package models.components;
 
 public class Ram {
-    private int capacity = 16384; // in bytes
+    private int capacity; // in bytes
     private byte[] memory;
-    VM vm;
 
-    public Ram(VM vm) {
-        this.vm = vm;
+    public Ram(int capacity) {
+        this.capacity = capacity;
         memory = new byte[capacity];
     }
 
+    public Ram() {
+        this(16384);
+    }
+
     public void init(byte[] code) {
-        int CS = vm.ts.getBase(0);
+        int CS = VM.getInstance().ts.getBase(0);
         System.arraycopy(code, 0, memory, CS, code.length);
     }
 
@@ -20,11 +23,11 @@ public class Ram {
     }
 
     public int getValue(int logicAddress) throws Exception {
-        return getValue(logicAddress, vm.bytesToAccess);
+        return getValue(logicAddress, VM.getInstance().bytesToAccess);
     }
 
     public int getValue(int logicAddress, int bytesToRead) throws Exception {
-        int physicAddress = vm.processor.logicToPhysic(logicAddress);
+        int physicAddress = VM.getInstance().processor.logicToPhysic(logicAddress);
         int data = 0;
 
         for (int i = 0; i < bytesToRead; i++)
@@ -34,11 +37,11 @@ public class Ram {
     }
 
     public void setValue(int logicAddress, int value) throws Exception {
-        setValue(logicAddress, value, vm.bytesToAccess);
+        setValue(logicAddress, value, VM.getInstance().bytesToAccess);
     }
 
     public void setValue(int logicAddress, int value, int bytesToWrite) throws Exception {
-        int physicAddress = vm.processor.logicToPhysic(logicAddress);
+        int physicAddress = VM.getInstance().processor.logicToPhysic(logicAddress);
         for (int i = bytesToWrite - 1; i >= 0; i--) {
             this.memory[physicAddress + i] = (byte) (value & 0xFF);
             value >>>= 8;

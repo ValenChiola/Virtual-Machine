@@ -1,10 +1,8 @@
 package models.functions.arithmetic;
 
-import models.components.VM;
-
 public class Mul extends Arithmetic {
-  public Mul(VM vm) {
-    super(vm);
+  public Mul() {
+    super();
   }
 
   @Override

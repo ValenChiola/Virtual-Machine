@@ -1,10 +1,8 @@
 package models.functions.arithmetic;
 
-import models.components.VM;
-
 public class Xor extends Arithmetic {
-    public Xor(VM vm) {
-        super(vm);
+    public Xor() {
+        super();
     }
 
     @Override

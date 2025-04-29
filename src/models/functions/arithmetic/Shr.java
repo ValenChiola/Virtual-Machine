@@ -1,10 +1,8 @@
 package models.functions.arithmetic;
 
-import models.components.VM;
-
 public class Shr extends Arithmetic {
-    public Shr(VM vm) {
-        super(vm);
+    public Shr() {
+        super();
     }
 
     @Override

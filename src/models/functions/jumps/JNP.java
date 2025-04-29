@@ -1,24 +1,14 @@
 package models.functions.jumps;
 
-import models.components.Register;
-import models.components.VM;
-import models.functions.Mnemonic;
+public class JNP extends Jump {
 
-public class JNP extends Mnemonic {
-
-  public JNP(VM vm) {
-    super(vm);
+  public JNP() {
+    super();
   }
 
   @Override
-  public void execute(int typeB, int B) throws Exception {
-    int value = vm.dataReadHandler(B, typeB);
-
-    Register CC = vm.registers.get(8);
-    Register IP = vm.registers.get(5);
-
-    if (((CC.getValue() >>> 31) & 0x1) == 1 || ((CC.getValue() >>> 30) & 0x1) == 1)
-      IP.setValue(0x00000000 + value);
+  protected boolean matchesCondition(int CCValue) {
+    return ((CCValue >>> 31) & 0x1) == 1 || ((CCValue >>> 30) & 0x1) == 1;
   }
 
 }
