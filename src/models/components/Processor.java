@@ -12,11 +12,11 @@ public class Processor {
         int physicAddress = offset + DSBase;
 
         if (physicAddress < DSBase) // If I am in the CS
-            throw new Exception("Out of bounds!");
+            throw new Exception("Out of bounds! CS reached!");
 
         int DSLimit = vm.ts.getLimit(); // If I Pass the memory limit
         if (physicAddress + vm.bytesToAccess > DSLimit)
-            throw new Exception("Out of bounds!");
+            throw new Exception("Out of bounds! Memory limit reached!");
 
         return physicAddress;
     }

@@ -15,7 +15,7 @@ public class Main {
 
 			Log.debug(ArgsParser.getInstance().toString());
 
-			new VM(ArgsParser.getVmxFile())
+			new VM()
 					.ram(new Ram(ArgsParser.getMemory()))
 					.processor(new Processor())
 					.ts(new TableSegments())

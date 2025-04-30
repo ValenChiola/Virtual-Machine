@@ -15,15 +15,15 @@ public class Log {
         }
     }
 
-    public static void warn(String message) {
-        if (Level.WARN.ordinal() <= level.ordinal()) {
-            System.out.println(Colors.YELLOW + "[WARN]: " + message + Colors.RESET);
-        }
-    }
-
     public static void info(String message) {
         if (Level.INFO.ordinal() <= level.ordinal()) {
             System.out.println(Colors.GREEN + "[INFO]: " + message + Colors.RESET);
+        }
+    }
+
+    public static void warn(String message) {
+        if (Level.WARN.ordinal() <= level.ordinal()) {
+            System.out.println(Colors.YELLOW + "[WARN]: " + message + Colors.RESET);
         }
     }
 

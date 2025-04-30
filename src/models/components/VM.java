@@ -49,8 +49,8 @@ public class VM {
 
 	private static VM instace;
 
-	public VM(String pathname) throws Exception {
-		this.code = getCode(pathname);
+	public VM() throws Exception {
+		this.code = getCode(ArgsParser.getVmxFile());
 	}
 
 	public VM ram(Ram ram) {
@@ -69,6 +69,16 @@ public class VM {
 	}
 
 	public VM build() {
+
+		if (this.ram == null)
+			throw new Error("RAM not found.");
+
+		if (this.ts == null)
+			throw new Error("Table Segments not found.");
+
+		if (this.processor == null)
+			throw new Error("Processor not found.");
+
 		VM.instace = this;
 
 		ts.init(this.code);
@@ -315,10 +325,6 @@ public class VM {
 	}
 
 	private byte[] getCode(String pathname) throws Exception {
-
-		if (!pathname.endsWith(".vmx"))
-			throw new Exception("File not supported");
-
 		byte[] content;
 
 		try {
