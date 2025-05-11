@@ -14,7 +14,7 @@ public class Ldh extends Mnemonic {
 
     int BValue = vm.dataReadHandler(B, typeB);
     int AValue = vm.dataReadHandler(A, typeA);
-    vm.dataWriteHandler(A, (AValue & 0xFF00) | (BValue & 0xFF), typeA);
+    vm.dataWriteHandler(A, (BValue & 0xFFFF) << 16 | (AValue & 0xFFFF), typeA);
   }
 
 }

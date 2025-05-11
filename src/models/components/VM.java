@@ -256,6 +256,7 @@ public class VM {
 	 * @throws Exception
 	 */
 	public void dataWriteHandler(int address, int value, int type) throws Exception {
+		System.out.println("Value: " + String.format("%08X ", value));
 		if (type <= 0 || type >= 4)
 			throw new Exception("Estás haciendo cualquiera flaco.");
 

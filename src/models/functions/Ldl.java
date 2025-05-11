@@ -14,7 +14,7 @@ public class Ldl extends Mnemonic {
 
     int BValue = vm.dataReadHandler(B, typeB);
     int AValue = vm.dataReadHandler(A, typeA);
-    vm.dataWriteHandler(A, (AValue & 0xFF) | (BValue & 0xFF00), typeA);
+    vm.dataWriteHandler(A, (AValue & 0xFFFF0000) | (BValue & 0xFFFF), typeA);
   }
 
 }

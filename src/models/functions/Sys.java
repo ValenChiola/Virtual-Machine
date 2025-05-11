@@ -40,7 +40,7 @@ public class Sys extends Mnemonic {
                 int logicAddress = EDX.getValue() + i * CH;
                 int value = vm.ram.getValue(logicAddress, CH);
                 System.out.println("[" + String.format("%04X", vm.processor.logicToPhysic(logicAddress)) + "]" + ": "
-                        + Converter.numberToString(value, AL));
+                        + Converter.numberToString(value, AL, CH));
             }
         }
     }

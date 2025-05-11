@@ -15,9 +15,9 @@ public class Converter {
         throw new Error("Converter failed: no valid mode in AL");
     }
 
-    public static String numberToString(int data, int AL) {
+    public static String numberToString(int data, int AL, int CH) {
         String result = "";
-
+        System.out.println(String.format("%08X ", data));
         if ((AL & 0x10) != 0) // Binario
             result += "0b" + Integer.toBinaryString(data).replace(' ', '0') + " ";
 
@@ -33,13 +33,13 @@ public class Converter {
             char c3 = (char) ((data >> 16) & 0xFF);
             char c4 = (char) ((data >> 24) & 0xFF);
 
-            if (c1 > 0 && c1 <= 31 || c1 >= 127)
+            if ((c1 <= 31 || c1 >= 127) && CH >= 1)
                 c1 = '.';
-            if (c2 > 0 && c2 <= 31 || c2 >= 127)
+            if ((c2 <= 31 || c2 >= 127) && CH >= 2)
                 c2 = '.';
-            if (c3 > 0 && c3 <= 31 || c3 >= 127)
+            if ((c3 <= 31 || c3 >= 127) && CH >= 3)
                 c3 = '.';
-            if (c4 > 0 && c4 <= 31 || c4 >= 127)
+            if ((c4 <= 31 || c4 >= 127) && CH >= 4)
                 c4 = '.';
 
             result += "" + c4 + c3 + c2 + c1 + " ";
