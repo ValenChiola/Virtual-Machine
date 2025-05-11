@@ -1,5 +1,9 @@
 package models.components;
 
+import java.util.List;
+import utils.Converter;
+import utils.ArgsParser;
+
 public class Ram {
     private int capacity; // in bytes
     private byte[] memory;
@@ -13,6 +17,31 @@ public class Ram {
         VM vm = VM.getInstance();
         int csBase = vm.ts.getBase(vm.ts.cs);
         int csSize = vm.ts.getSize(vm.ts.cs);
+
+        // copy params to RAM
+        List<String> params = ArgsParser.getProgramParams();
+        int psSize = vm.ts.getSize(vm.ts.ps);
+
+        int i = 0;
+        int paramCounter = 0;
+        int initPointerIndex = psSize - 4 * params.size();
+
+        for (String param : params) {
+            try {
+
+                setValue(initPointerIndex + paramCounter * 4, i);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return;
+            }
+            paramCounter++;
+            for (int j = 0; j < param.length(); j++)
+                memory[i++] = (byte) param.charAt(j);
+
+            memory[i++] = 0;
+        }
+
+        // copy code to RAM
         System.arraycopy(vm.code, 0, memory, csBase, csSize);
     }
 

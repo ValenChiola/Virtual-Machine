@@ -256,7 +256,6 @@ public class VM {
 	 * @throws Exception
 	 */
 	public void dataWriteHandler(int address, int value, int type) throws Exception {
-		System.out.println("Value: " + String.format("%08X ", value));
 		if (type <= 0 || type >= 4)
 			throw new Exception("Estás haciendo cualquiera flaco.");
 
@@ -374,7 +373,6 @@ public class VM {
 		registers.put(3, new Register("SS", ts.ss << 16));
 		registers.put(4, new Register("KS", ts.ks << 16));
 		registers.put(5, new Register("IP", ts.cs << 16 | offset & 0xFFFF));
-		System.out.println("IP: " + String.format("%08X ", (ts.cs << 16 | offset & 0xFFFF)));
 		registers.put(8, new Register("CC"));
 		registers.put(9, new Register("AC"));
 		registers.put(10, new Register("EAX"));

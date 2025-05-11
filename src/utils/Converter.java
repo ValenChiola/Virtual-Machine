@@ -17,7 +17,6 @@ public class Converter {
 
     public static String numberToString(int data, int AL, int CH) {
         String result = "";
-        System.out.println(String.format("%08X ", data));
         if ((AL & 0x10) != 0) // Binario
             result += "0b" + Integer.toBinaryString(data).replace(' ', '0') + " ";
 
