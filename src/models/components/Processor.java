@@ -4,21 +4,25 @@ public class Processor {
 
     public int logicToPhysic(int logicAddress) throws Exception {
         VM vm = VM.getInstance();
+        return logicToPhysic(logicAddress, vm.bytesToAccess);
+    }
+
+    public int logicToPhysic(int logicAddress, int bytesToAccess) throws Exception {
+        VM vm = VM.getInstance();
 
         int segment = logicAddress >> 16;
         int offset = logicAddress & 0xFFFF;
 
-        int DSBase = vm.ts.getBase(segment);
-        int physicAddress = offset + DSBase;
+        int base = vm.ts.getBase(segment);
+        int physicAddress = offset + base;
 
-        if (physicAddress < DSBase) // If I am in the CS
-            throw new Exception("Out of bounds! CS reached!");
+        if (physicAddress < base)
+            throw new Exception("Out of bounds! Lower limit reached!");
 
-        int DSLimit = vm.ts.getLimit(); // If I Pass the memory limit
-        if (physicAddress + vm.bytesToAccess > DSLimit)
-            throw new Exception("Out of bounds! Memory limit reached!");
+        int limit = vm.ts.getLimit(segment);
+        if (physicAddress + bytesToAccess > limit)
+            throw new Exception("Out of bounds! Segment limit reached!");
 
         return physicAddress;
     }
-
 }

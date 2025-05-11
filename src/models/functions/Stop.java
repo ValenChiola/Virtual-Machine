@@ -14,7 +14,7 @@ public class Stop extends Mnemonic {
         VM vm = VM.getInstance();
 
         Register IP = vm.registers.get(5);
-        IP.setValue(0x00000000 + vm.ts.getSize(0));
+        IP.setValue(vm.ts.cs << 16 | vm.ts.getSize(0));
     }
 
 }

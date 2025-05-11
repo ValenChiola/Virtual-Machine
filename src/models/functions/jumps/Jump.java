@@ -20,7 +20,7 @@ public abstract class Jump extends Mnemonic {
         Register IP = vm.registers.get(5);
 
         if (matchesCondition(CC.getValue()))
-            IP.setValue(0x00000000 + value);
+            IP.setValue(vm.ts.cs << 16 | value);
     }
 
     protected abstract boolean matchesCondition(int CCValue);

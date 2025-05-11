@@ -46,11 +46,17 @@ public class VM {
 	public Map<Integer, Register> registers;
 	public Map<Integer, Mnemonic> mnemonics;
 	byte[] code;
+	public int ksSize;
+	public int dsSize;
+	public int esSize;
+	public int ssSize;
+	public int offset;
+	public int version;
 
 	private static VM instace;
 
 	public VM() throws Exception {
-		this.code = getCode(ArgsParser.getVmxFile());
+		setSegments(ArgsParser.getVmxFile());
 	}
 
 	public VM ram(Ram ram) {
@@ -81,8 +87,8 @@ public class VM {
 
 		VM.instace = this;
 
-		ts.init(this.code);
-		ram.init(this.code);
+		ts.init();
+		ram.init();
 		registers();
 		mnemonics();
 
@@ -96,17 +102,18 @@ public class VM {
 	public void start() throws Exception {
 
 		if (ArgsParser.isDissasemblerEnabled())
-			disassembler(code);
+			disassembler();
 
-		execute(code);
+		execute();
 
 	}
 
-	private void execute(byte[] code) throws Exception {
+	private void execute() throws Exception {
 		Register IP = registers.get(5);
 		int ii = 0;
 
-		while (IP.getValue() < code.length) {
+		int csSize = ts.getSize(ts.cs);
+		while (IP.getValue(3) < csSize) {
 			Log.debug("======     ITERACIÓN " + (ii + 1) + "	  ======");
 
 			int IpValue = IP.getValue();
@@ -117,16 +124,10 @@ public class VM {
 			int ABytes = ((instruction & 0x30) >> 4);
 			int operation = (instruction & 0x1F);
 
-			int B = 0;
-			int A = 0;
+			int B = ram.getValue(IpValue + 1, BBytes);
+			int A = ram.getValue((IpValue + BBytes) + 1, ABytes);
 
-			for (int i = 1; i < BBytes + 1; i++)
-				B = (B << 8) | ram.getValue(IpValue + i, 1) & 0xFFFFFF;
-
-			for (int i = 1; i < ABytes + 1; i++)
-				A = (A << 8) | ram.getValue(IpValue + BBytes + i, 1) & 0xFFFFFF;
-
-			IP.setValue(ts.getBaseShifted(0) | (IpValue + (ABytes + BBytes + 1))); // Segment | Offset
+			IP.setValue((IpValue + ABytes + BBytes) + 1);
 
 			Log.debug("Instruction: " + String.format("%8s ", Integer.toBinaryString(instruction & 0xFF)));
 			Log.debug("Abytes: " + String.format("%2s ", Integer.toBinaryString(ABytes & 0x3)));
@@ -150,10 +151,11 @@ public class VM {
 		}
 	}
 
-	private void disassembler(byte[] code) throws Exception {
+	private void disassembler() throws Exception {
 		Register IP = registers.get(5);
 
-		while (IP.getValue() < code.length) {
+		int csSize = ts.getSize(ts.cs);
+		while (IP.getValue(3) < csSize) {
 			int IpValue = IP.getValue();
 
 			int instruction = ram.getValue(IpValue, 1);
@@ -171,7 +173,7 @@ public class VM {
 			for (int i = 1; i < ABytes + 1; i++)
 				A = (A << 8) | ram.getValue(IpValue + BBytes + i, 1) & 0xFFFFFF;
 
-			IP.setValue(ts.getBaseShifted(0) | (IpValue + (ABytes + BBytes + 1))); // Segment | Offset
+			IP.setValue(IpValue + (ABytes + BBytes + 1));
 
 			Mnemonic mnemonic = mnemonics.get(operation);
 
@@ -182,7 +184,7 @@ public class VM {
 				String AOperand = getDisassemblerOperand(ABytes, A);
 
 				byte[] aux = new byte[(ABytes + BBytes + 1)];
-				System.arraycopy(code, IpValue, aux, 0, ((ABytes + BBytes + 1)));
+				System.arraycopy(code, IpValue & 0xFFFF, aux, 0, ((ABytes + BBytes + 1)));
 				String bytes = "";
 
 				for (byte b : aux)
@@ -207,7 +209,7 @@ public class VM {
 		}
 		System.out.println("--------------------------------");
 
-		IP.setValue(0); // Restart
+		IP.setValue(ts.cs << 16); // Restart
 	}
 
 	private String getDisassemblerOperand(int type, int value) {
@@ -268,17 +270,16 @@ public class VM {
 
 		else if (type == 3) {
 			int registerCode = (address & 0xFF) >> 4;
-			if (registerCode <= 1) {
-				int segment = (address & 0xFF) << 12;
+			Register register = registers.get(registerCode);
+			if (register == null)
+				throw new Exception("Register not found.");
+			int registerValue = register.getValue();
+			if (registerCode <= 4) {
+				int segment = registerValue;
 				int offset = (address & 0xFFFF00) >> 8;
 				ram.setValue(segment | offset, value);
 			} else {
-				Register register = registers.get(registerCode);
-				if (register == null)
-					throw new Exception("Register not found.");
-
-				int logicAddress = register.getValue();
-				ram.setValue(logicAddress, value);
+				ram.setValue(registerValue, value);
 			}
 		}
 	}
@@ -310,25 +311,30 @@ public class VM {
 
 		// memoria
 		int registerCode = (value & 0xF0) >> 4;
-		if (registerCode <= 1) {// acceder a memoria directamente
-			int segment = (value & 0xFF) << 12;
+		Register register = registers.get(registerCode);
+		if (register == null)
+			throw new Exception("Register not found.");
+		int registerValue = register.getValue();
+		if (registerCode <= 4) {
+			int segment = registerValue;
 			int offset = (value & 0xFFFF00) >> 8;
 			return ram.getValue(segment | offset);
-		} else { // puntero a memoria
-			Register register = registers.get(registerCode);
-			if (register == null)
-				throw new Exception("Register not found.");
-
-			int logicAddress = register.getValue();
-			return ram.getValue(logicAddress);
+		} else {
+			return ram.getValue(registerValue);
 		}
 	}
 
-	private byte[] getCode(String pathname) throws Exception {
+	private void setSegments(String pathname) throws Exception {
 		byte[] content;
 
 		try {
 			content = Files.readAllBytes(Paths.get(pathname));
+
+			for (byte b : content) {
+				System.out.print(String.format("%02X ", b));
+			}
+			System.out.println();
+
 		} catch (IOException e) {
 			throw new Exception("File not found");
 		}
@@ -336,23 +342,38 @@ public class VM {
 		if (content.length == 0)
 			throw new Exception("File is empty or not found");
 
-		int codeSize = (content[6] << 8) | (((int) content[7] << 24) >>> 24);
-		byte[] code = new byte[codeSize];
-		System.arraycopy(content, 8, code, 0, codeSize);
+		version = content[5];
+		int csSize = (content[6] << 8) | (((int) content[7] << 24) >>> 24);
+		code = new byte[csSize];
+		if (version == 1) {
+			System.arraycopy(content, 8, code, 0, csSize);
+		} else if (version == 2) {
+			dsSize = (content[8] << 8) | (((int) content[9] << 24) >>> 24);
+			esSize = (content[10] << 8) | (((int) content[11] << 24) >>> 24);
+			ssSize = (content[12] << 8) | (((int) content[13] << 24) >>> 24);
+			ksSize = (content[14] << 8) | (((int) content[15] << 24) >>> 24);
+			offset = (content[16] << 8) | (((int) content[17] << 24) >>> 24);
+			System.arraycopy(content, 18, code, 0, csSize);
+		} else {
+			throw new Exception("Invalid version");
+		}
+
+		System.out.println("Offset: " + offset);
 
 		System.out.println("--------------------------------");
-		System.out.println("CodeSize: " + codeSize);
+		System.out.println("CodeSize: " + csSize);
 		System.out.println("--------------------------------");
-
-		return code;
-
 	}
 
 	private void registers() {
 		registers = new HashMap<>();
-		registers.put(0, new Register("CS", 0x00000000));
-		registers.put(1, new Register("DS", 0x00010000));
-		registers.put(5, new Register("IP", 0x00000000));
+		registers.put(0, new Register("CS", ts.cs << 16));
+		registers.put(1, new Register("DS", ts.ds << 16));
+		registers.put(2, new Register("ES", ts.es << 16));
+		registers.put(3, new Register("SS", ts.ss << 16));
+		registers.put(4, new Register("KS", ts.ks << 16));
+		registers.put(5, new Register("IP", ts.cs << 16 | offset & 0xFFFF));
+		System.out.println("IP: " + String.format("%08X ", (ts.cs << 16 | offset & 0xFFFF)));
 		registers.put(8, new Register("CC"));
 		registers.put(9, new Register("AC"));
 		registers.put(10, new Register("EAX"));

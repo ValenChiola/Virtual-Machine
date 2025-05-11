@@ -9,13 +9,11 @@ public class Ram {
         memory = new byte[capacity];
     }
 
-    public Ram() {
-        this(16384);
-    }
-
-    public void init(byte[] code) {
-        int CS = VM.getInstance().ts.getBase(0);
-        System.arraycopy(code, 0, memory, CS, code.length);
+    public void init() {
+        VM vm = VM.getInstance();
+        int csBase = vm.ts.getBase(vm.ts.cs);
+        int csSize = vm.ts.getSize(vm.ts.cs);
+        System.arraycopy(vm.code, 0, memory, csBase, csSize);
     }
 
     public int getCapacity() {
@@ -27,7 +25,7 @@ public class Ram {
     }
 
     public int getValue(int logicAddress, int bytesToRead) throws Exception {
-        int physicAddress = VM.getInstance().processor.logicToPhysic(logicAddress);
+        int physicAddress = VM.getInstance().processor.logicToPhysic(logicAddress, bytesToRead);
         int data = 0;
 
         for (int i = 0; i < bytesToRead; i++)
@@ -41,7 +39,7 @@ public class Ram {
     }
 
     public void setValue(int logicAddress, int value, int bytesToWrite) throws Exception {
-        int physicAddress = VM.getInstance().processor.logicToPhysic(logicAddress);
+        int physicAddress = VM.getInstance().processor.logicToPhysic(logicAddress, bytesToWrite);
         for (int i = bytesToWrite - 1; i >= 0; i--) {
             this.memory[physicAddress + i] = (byte) (value & 0xFF);
             value >>>= 8;

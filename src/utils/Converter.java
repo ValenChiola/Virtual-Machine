@@ -33,13 +33,13 @@ public class Converter {
             char c3 = (char) ((data >> 16) & 0xFF);
             char c4 = (char) ((data >> 24) & 0xFF);
 
-            if (c1 <= 31 || c1 >= 127)
+            if (c1 > 0 && c1 <= 31 || c1 >= 127)
                 c1 = '.';
-            if (c2 <= 31 || c2 >= 127)
+            if (c2 > 0 && c2 <= 31 || c2 >= 127)
                 c2 = '.';
-            if (c3 <= 31 || c3 >= 127)
+            if (c3 > 0 && c3 <= 31 || c3 >= 127)
                 c3 = '.';
-            if (c4 <= 31 || c4 >= 127)
+            if (c4 > 0 && c4 <= 31 || c4 >= 127)
                 c4 = '.';
 
             result += "" + c4 + c3 + c2 + c1 + " ";
