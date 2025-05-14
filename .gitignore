@@ -4,6 +4,7 @@
 *.txt
 *.asm
 *.vmx
+*.vmi
 /build
 *.jar
 .gradle

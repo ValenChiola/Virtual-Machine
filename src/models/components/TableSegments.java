@@ -83,14 +83,14 @@ public class TableSegments {
     }
 
     public int getBase(int segment) {
+        if (!table.containsKey(segment))
+            return 0;
         return table.get(segment)[0];
     }
 
-    public int getBaseShifted(int segment) {
-        return getBase(segment) << 16;
-    }
-
     public int getSize(int segment) {
+        if (!table.containsKey(segment))
+            return 0;
         return table.get(segment)[1];
     }
 
@@ -103,9 +103,7 @@ public class TableSegments {
     }
 
     public int getValue(int segment) {
-        if (!table.containsKey(segment))
-            return 0;
-        return getBaseShifted(segment) | getSize(segment);
+        return (getBase(segment) << 16) | getSize(segment);
     }
 
     public void setValue(int segment, int base, int size) {

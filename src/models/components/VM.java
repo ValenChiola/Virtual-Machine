@@ -77,7 +77,7 @@ public class VM {
 		return this;
 	}
 
-	public VM build() throws IOException, Exception {
+	public VM build() throws Exception {
 
 		if (this.ram == null)
 			throw new Error("RAM not found.");
@@ -194,6 +194,8 @@ public class VM {
 	}
 
 	private void disassembler() throws Exception {
+		System.out.println("--------------------------------");
+
 		Register IP = registers.get(5);
 
 		int csSize = ts.getSize(ts.cs);
@@ -271,10 +273,15 @@ public class VM {
 
 		if (type == 3) {
 			int registerCode = (value & 0xF0) >> 4;
-			if (registerCode <= 1) {// acceder a memoria directamente
+			if (registerCode <= 4) {// acceder a memoria directamente
+				int bytesToRead = bytesToAccess - (value & 3);
+				String modifier = bytesToRead == 1 ? "b" : bytesToRead == 2 ? "w" : "l";
+
 				int offset = (value & 0xFFFF00) >> 8;
-				return "[" + offset + "]";
+
+				return modifier + "[" + offset + "]";
 			} else { // puntero a memoria
+
 				Register register = registers.get(registerCode);
 				if (register == null)
 					throw new Error("Register not found.");
@@ -298,8 +305,8 @@ public class VM {
 	 * @throws Exception
 	 */
 	public void dataWriteHandler(int address, int value, int type) throws Exception {
-		if (type <= 0 || type >= 4)
-			throw new Exception("Estás haciendo cualquiera flaco.");
+		if (type <= 0 || type == 2 || type >= 4)
+			throw new Exception("Cannot write to this type (" + type + ").");
 
 		else if (type == 1) {// Registro
 			int registerAddress = (address & 0xFF) >> 4;
@@ -307,10 +314,8 @@ public class VM {
 			// El bit 5 y 6 para ax, ah o al.
 			int identifier = (address & 0xC) >> 2;
 			registers.get(registerAddress).setValue(value, identifier);
-		} else if (type == 2)
-			throw new Exception("Estás haciendo cualquiera flaco."); // Inmediato
-
-		else if (type == 3) {
+		} else if (type == 3) {
+			int bytesToWrite = bytesToAccess - (address & 3);
 			int registerCode = (address & 0xFF) >> 4;
 			Register register = registers.get(registerCode);
 			if (register == null)
@@ -319,10 +324,9 @@ public class VM {
 			if (registerCode <= 4) {
 				int segment = registerValue;
 				int offset = (address & 0xFFFF00) >> 8;
-				ram.setValue(segment | offset, value);
-			} else {
-				ram.setValue(registerValue, value);
-			}
+				ram.setValue(segment | offset, value, bytesToWrite);
+			} else
+				ram.setValue(registerValue, value, bytesToWrite);
 		}
 	}
 
@@ -340,7 +344,7 @@ public class VM {
 	 */
 	public int dataReadHandler(int value, int type) throws Exception {
 		if (type <= 0 || type >= 4)
-			throw new Exception("Estás haciendo cualquiera flaco.");
+			throw new Exception("Cannot read from this type (" + type + ").");
 
 		if (type == 1) { // registro
 			int registerAddress = (value & 0xFF) >> 4;
@@ -352,7 +356,8 @@ public class VM {
 			return ((value & 0xFFFF) << 16) >> 16; // por las dudas
 
 		// memoria
-		int registerCode = (value & 0xF0) >> 4;
+		int bytesToRead = bytesToAccess - (value & 0xF);
+		int registerCode = (value & 3) >> 4;
 		Register register = registers.get(registerCode);
 		if (register == null)
 			throw new Exception("Register not found.");
@@ -360,10 +365,9 @@ public class VM {
 		if (registerCode <= 4) {
 			int segment = registerValue;
 			int offset = (value & 0xFFFF00) >> 8;
-			return ram.getValue(segment | offset);
-		} else {
-			return ram.getValue(registerValue);
-		}
+			return ram.getValue(segment | offset, bytesToRead);
+		} else
+			return ram.getValue(registerValue, bytesToRead);
 	}
 
 	private void setSegments(String pathname) throws Exception {
@@ -371,12 +375,6 @@ public class VM {
 
 		try {
 			content = Files.readAllBytes(Paths.get(pathname));
-
-			for (byte b : content) {
-				System.out.print(String.format("%02X ", b));
-			}
-			System.out.println();
-
 		} catch (IOException e) {
 			throw new Exception("File not found");
 		}
@@ -399,10 +397,9 @@ public class VM {
 		} else {
 			throw new Exception("Invalid version");
 		}
-
-		System.out.println("Offset: " + offset);
-
 		System.out.println("--------------------------------");
+		System.out.println("Version: " + version);
+		System.out.println("Offset: " + offset);
 		System.out.println("CodeSize: " + csSize);
 		System.out.println("--------------------------------");
 	}
@@ -461,28 +458,12 @@ public class VM {
 	}
 
 	private void printRegisters() throws Exception {
-		Log.debug("CC: " + String.format("%32s ", Integer.toBinaryString(dataReadHandler(0X80, 1))));
-		Log.debug("IP: " + String.format("%08X ", dataReadHandler(0x50, 1)));
-		Log.debug("AC: " + String.format("%08X ", dataReadHandler(0x90, 1)));
-		Log.debug("EAX: " + String.format("%08X ", dataReadHandler(0xA0, 1)));
-		Log.debug("ECX: " + String.format("%08X ", dataReadHandler(0xC0, 1)));
-		Log.debug("EDX: " + String.format("%08X ", dataReadHandler(0xD0, 1)));
-		Log.debug("EFX: " + String.format("%08X ", dataReadHandler(0xF0, 1)));
-		Log.debug("[0]/DS: " + String.format("%02X ", dataReadHandler(0x10, 3)));
-		Log.debug("[1]: " + String.format("%02X ", dataReadHandler(0x110, 3)));
-		Log.debug("[2]: " + String.format("%02X ", dataReadHandler(0x210, 3)));
-		Log.debug("[3]: " + String.format("%02X ", dataReadHandler(0x310, 3)));
-		Log.debug("[4]: " + String.format("%02X ", dataReadHandler(0x410, 3)));
-		Log.debug("[5]: " + String.format("%02X ", dataReadHandler(0x510, 3)));
-		Log.debug("[6]: " + String.format("%02X ", dataReadHandler(0x610, 3)));
-		Log.debug("[7]: " + String.format("%02X ", dataReadHandler(0x710, 3)));
-		Log.debug("[8]: " + String.format("%02X ", dataReadHandler(0x810, 3)));
-		Log.debug("[9]: " + String.format("%02X ", dataReadHandler(0x910, 3)));
-		Log.debug("[10]: " + String.format("%02X ", dataReadHandler(0xA10, 3)));
-		Log.debug("[11]: " + String.format("%02X ", dataReadHandler(0xB10, 3)));
-		Log.debug("[12]: " + String.format("%02X ", dataReadHandler(0xC10, 3)));
-		Log.debug("[13]: " + String.format("%02X ", dataReadHandler(0xD10, 3)));
-		Log.debug("[14]: " + String.format("%02X ", dataReadHandler(0xE10, 3)));
+
+		for (Register register : registers.values())
+			Log.debug(register.getName() + ": " + String.format("%08X ", register.getValue()));
+
+		for (int i = 0; i < 15; i++)
+			Log.debug("[" + i + "]: " + String.format("%02X ", ram.getValue(ts.ds << 16 | i, 1)));
 	}
 
 }

@@ -1,7 +1,6 @@
 package models.components;
 
 import java.util.List;
-import utils.Converter;
 import utils.ArgsParser;
 
 public class Ram {
@@ -13,14 +12,25 @@ public class Ram {
         memory = new byte[capacity];
     }
 
-    public void init() {
+    public void init() throws Exception {
         VM vm = VM.getInstance();
+
         int csBase = vm.ts.getBase(vm.ts.cs);
+
+        int psSize = vm.ts.getSize(vm.ts.ps);
+        int ksSize = vm.ts.getSize(vm.ts.ks);
         int csSize = vm.ts.getSize(vm.ts.cs);
+        int dsSize = vm.ts.getSize(vm.ts.ds);
+        int ssSize = vm.ts.getSize(vm.ts.ss);
+        int esSize = vm.ts.getSize(vm.ts.es);
+
+        int requestedSize = psSize + ksSize + csSize + dsSize + ssSize + esSize;
+        if (requestedSize > capacity)
+            throw new Exception(
+                    "Not enough memory - Requested: " + requestedSize + " bytes, Available: " + capacity + " bytes");
 
         // copy params to RAM
         List<String> params = ArgsParser.getProgramParams();
-        int psSize = vm.ts.getSize(vm.ts.ps);
 
         int i = 0;
         int paramCounter = 0;

@@ -91,7 +91,9 @@ public class ArgsParser {
     }
 
     public static String getLogLevel() {
-        return getFlag("log");
+        String level = getFlag("log");
+
+        return level != null ? level : "info";
     }
 
     public static int getMemory() {

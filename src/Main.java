@@ -23,7 +23,8 @@ public class Main {
 					.start();
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			if (ArgsParser.getLogLevel().equals("debug"))
+				e.printStackTrace();
 			System.out.println(e.getMessage());
 		}
 	}
