@@ -1,9 +1,13 @@
 package models.functions;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Scanner;
 
 import models.components.Register;
 import models.components.VM;
+import utils.ArgsParser;
 import utils.Converter;
 
 public class Sys extends Mnemonic {
@@ -42,6 +46,71 @@ public class Sys extends Mnemonic {
                 System.out.println("[" + String.format("%04X", vm.processor.logicToPhysic(logicAddress)) + "]" + ": "
                         + Converter.numberToString(value, AL, CH));
             }
+        } else if (code == 3) {
+
+        } else if (code == 4) {
+
+        } else if (code == 7) {
+
+        } else if (code == 0xF) {
+            String vmiFile = ArgsParser.getVmiFile();
+            if (vmiFile == null)
+                return;
+            createVmiFile(vmiFile);
+            // Pedir accion
+            String action = sc.nextLine();
+            switch (action.toLowerCase()) {
+                case "g":
+                    break;
+                case "q":
+                    System.exit(0);
+                    break;
+                default:
+                    vm.executeNextOperation();
+                    new Sys().execute(typeB, B);
+                    break;
+            }
+        }
+    }
+
+    private void createVmiFile(String vmiFile) {
+        VM vm = VM.getInstance();
+        int ramCapacity = vm.ram.getCapacity();
+        int vmiLength = 8 + 64 + 32 + ramCapacity;
+        byte[] data = new byte[vmiLength];
+
+        // Escribir Identificador
+        byte[] header = "VMI25".getBytes();
+        System.arraycopy(header, 0, data, 0, header.length);
+        data[5] = (byte) vm.version;
+        data[6] = (byte) ((ramCapacity >>> 8) & 0xFF);
+        data[7] = (byte) (ramCapacity & 0xFF);
+
+        // Escribir registros
+        for (int i = 0; i < 16; i++) {
+            int value = vm.registers.get(i).getValue();
+            data[8 + i * 4] = (byte) ((value >>> 24) & 0xFF);
+            data[9 + i * 4] = (byte) ((value >>> 16) & 0xFF);
+            data[10 + i * 4] = (byte) ((value >>> 8) & 0xFF);
+            data[11 + i * 4] = (byte) (value & 0xFF);
+        }
+
+        // Escribir tabla de segmentos
+        for (int i = 0; i < 8; i++) {
+            int value = vm.ts.getValue(i);
+            data[64 + i * 4] = (byte) ((value >>> 24) & 0xFF);
+            data[65 + i * 4] = (byte) ((value >>> 16) & 0xFF);
+            data[66 + i * 4] = (byte) ((value >>> 8) & 0xFF);
+            data[67 + i * 4] = (byte) (value & 0xFF);
+        }
+
+        // Escribir la memoria
+        System.arraycopy(vm.ram.getMemory(), 0, data, 104, ramCapacity);
+
+        try {
+            Files.write(Path.of(vmiFile), data);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

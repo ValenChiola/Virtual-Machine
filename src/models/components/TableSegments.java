@@ -22,7 +22,6 @@ public class TableSegments {
 
     public void init() {
         VM vm = VM.getInstance();
-
         if (vm.version == 1) {
             table.put(cs, new Integer[] { 0, vm.code.length });
             table.put(ds, new Integer[] { vm.code.length, vm.ram.getCapacity() - vm.code.length });
@@ -97,6 +96,20 @@ public class TableSegments {
 
     public int getLimit(int segment) {
         return getBase(segment) + getSize(segment);
+    }
+
+    public int getSize() {
+        return table.size();
+    }
+
+    public int getValue(int segment) {
+        if (!table.containsKey(segment))
+            return 0;
+        return getBaseShifted(segment) | getSize(segment);
+    }
+
+    public void setValue(int segment, int base, int size) {
+        table.put(segment, new Integer[] { base, size });
     }
 
 }

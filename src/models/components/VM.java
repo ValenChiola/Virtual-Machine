@@ -56,7 +56,6 @@ public class VM {
 	private static VM instace;
 
 	public VM() throws Exception {
-		setSegments(ArgsParser.getVmxFile());
 	}
 
 	public VM ram(Ram ram) {
@@ -74,7 +73,7 @@ public class VM {
 		return this;
 	}
 
-	public VM build() {
+	public VM build() throws IOException, Exception {
 
 		if (this.ram == null)
 			throw new Error("RAM not found.");
@@ -87,12 +86,49 @@ public class VM {
 
 		VM.instace = this;
 
-		ts.init();
-		ram.init();
-		registers();
+		String vmiFile = ArgsParser.getVmiFile();
+		String vmxFile = ArgsParser.getVmxFile();
+		if (vmiFile != null && vmxFile == null) {
+			loadVmi(vmiFile);
+		} else {
+			setSegments(vmxFile);
+			ts.init();
+			ram.init();
+			registers();
+		}
 		mnemonics();
 
 		return this;
+	}
+
+	private void loadVmi(String vmiFile) throws IOException {
+		byte[] data = Files.readAllBytes(Paths.get(vmiFile));
+		version = data[5];
+		ram = new Ram((data[6] << 8) | data[7]);
+		registers = new HashMap<>();
+		for (int i = 0; i < 16; i++) {
+			registers.put(i, new Register("puto", (data[8 + i * 4] << 24) | (data[9 + i * 4] << 16)
+					| (data[10 + i * 4] << 8) | data[11 + i * 4]));
+		}
+		ts.cs = registers.get(0).getValue() >>> 16;
+		ts.ds = registers.get(1).getValue() >>> 16;
+		ts.es = registers.get(2).getValue() >>> 16;
+		ts.ss = registers.get(3).getValue() >>> 16;
+		ts.ks = registers.get(4).getValue() >>> 16;
+		for (int i = 0; i < 8; i++) {
+			ts.setValue(i, (data[64 + i * 4] << 8) | (data[65 + i * 4]), (data[66 + i * 4] << 8)
+					| data[67 + i * 4]);
+		}
+
+		for (int i = 0; i < ram.getCapacity(); i++) {
+			ram.getMemory()[i] = data[104 + i];
+		}
+
+		try {
+			printRegisters();
+		} catch (Exception e) {
+			Log.error(e.getMessage());
+		}
 	}
 
 	public static VM getInstance() {
@@ -108,6 +144,38 @@ public class VM {
 
 	}
 
+	public void executeNextOperation() throws Exception {
+		Register IP = registers.get(5);
+		int IpValue = IP.getValue();
+
+		int instruction = ram.getValue(IpValue, 1);
+
+		int BBytes = ((instruction & 0xC0) >> 6);
+		int ABytes = ((instruction & 0x30) >> 4);
+		int operation = (instruction & 0x1F);
+
+		int B = ram.getValue(IpValue + 1, BBytes);
+		int A = ram.getValue((IpValue + BBytes) + 1, ABytes);
+
+		IP.setValue((IpValue + ABytes + BBytes) + 1);
+
+		Log.debug("Instruction: " + String.format("%8s ", Integer.toBinaryString(instruction & 0xFF)));
+		Log.debug("Abytes: " + String.format("%2s ", Integer.toBinaryString(ABytes & 0x3)));
+		Log.debug("A: " + String.format("%24s ", Integer.toBinaryString(A & 0xFFFFFF)));
+		Log.debug("Bbytes: " + String.format("%2s ", Integer.toBinaryString(BBytes & 0x3)));
+		Log.debug("B: " + String.format("%24s ", Integer.toBinaryString(B & 0xFFFFFF)));
+		Log.debug("Operation: " + String.format("%02X ", operation));
+
+		Mnemonic mnemonic = mnemonics.get(operation);
+
+		if (mnemonic == null)
+			throw new Exception("Mnemonic " + operation + " not found :/");
+
+		mnemonic._execute(ABytes, BBytes, A, B);
+
+		printRegisters();
+	}
+
 	private void execute() throws Exception {
 		Register IP = registers.get(5);
 		int ii = 0;
@@ -115,38 +183,8 @@ public class VM {
 		int csSize = ts.getSize(ts.cs);
 		while (IP.getValue(3) < csSize) {
 			Log.debug("======     ITERACIÓN " + (ii + 1) + "	  ======");
-
-			int IpValue = IP.getValue();
-
-			int instruction = ram.getValue(IpValue, 1);
-
-			int BBytes = ((instruction & 0xC0) >> 6);
-			int ABytes = ((instruction & 0x30) >> 4);
-			int operation = (instruction & 0x1F);
-
-			int B = ram.getValue(IpValue + 1, BBytes);
-			int A = ram.getValue((IpValue + BBytes) + 1, ABytes);
-
-			IP.setValue((IpValue + ABytes + BBytes) + 1);
-
-			Log.debug("Instruction: " + String.format("%8s ", Integer.toBinaryString(instruction & 0xFF)));
-			Log.debug("Abytes: " + String.format("%2s ", Integer.toBinaryString(ABytes & 0x3)));
-			Log.debug("A: " + String.format("%24s ", Integer.toBinaryString(A & 0xFFFFFF)));
-			Log.debug("Bbytes: " + String.format("%2s ", Integer.toBinaryString(BBytes & 0x3)));
-			Log.debug("B: " + String.format("%24s ", Integer.toBinaryString(B & 0xFFFFFF)));
-			Log.debug("Operation: " + String.format("%02X ", operation));
-
-			Mnemonic mnemonic = mnemonics.get(operation);
-
-			if (mnemonic == null)
-				throw new Exception("Mnemonic " + operation + " not found :/");
-
-			mnemonic._execute(ABytes, BBytes, A, B);
-
-			printRegisters();
-
+			executeNextOperation();
 			Log.debug("====== FIN DE ITERACIÓN " + (ii + 1) + " ======");
-
 			ii++;
 		}
 	}
@@ -373,6 +411,8 @@ public class VM {
 		registers.put(3, new Register("SS", ts.ss << 16));
 		registers.put(4, new Register("KS", ts.ks << 16));
 		registers.put(5, new Register("IP", ts.cs << 16 | offset & 0xFFFF));
+		registers.put(6, new Register("SP"));
+		registers.put(7, new Register("BP"));
 		registers.put(8, new Register("CC"));
 		registers.put(9, new Register("AC"));
 		registers.put(10, new Register("EAX"));

@@ -49,6 +49,10 @@ public class Ram {
         return capacity;
     }
 
+    public byte[] getMemory() {
+        return memory;
+    }
+
     public int getValue(int logicAddress) throws Exception {
         return getValue(logicAddress, VM.getInstance().bytesToAccess);
     }
