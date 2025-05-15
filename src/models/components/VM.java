@@ -90,6 +90,8 @@ public class VM {
 
 		VM.instace = this;
 
+		mnemonics();
+
 		String vmiFile = ArgsParser.getVmiFile();
 		String vmxFile = ArgsParser.getVmxFile();
 		if (vmiFile != null && vmxFile == null) {
@@ -99,34 +101,46 @@ public class VM {
 			ts.init();
 			ram.init();
 			registers();
+
+			// Push params to stack (Main Subrutine)
+			int psSize = ts.getSize(ts.ps);
+			int params = ArgsParser.getProgramParams().size();
+			int argv = psSize - 4 * params;
+
+			new Push().execute(2, params > 0 ? argv : -1); // Pointer to argv
+
+			new Push().execute(2, params); // Number of params
+
+			new Push().execute(2, -1); // Return address of main subrutine
+
 		}
-		mnemonics();
 
 		return this;
 	}
 
 	private void loadVmi(String vmiFile) throws IOException {
 		byte[] data = Files.readAllBytes(Paths.get(vmiFile));
+
 		version = data[5];
 		ram = new Ram((data[6] << 8) | data[7]);
+
 		registers = new HashMap<>();
-		for (int i = 0; i < 16; i++) {
-			registers.put(i, new Register("puto", (data[8 + i * 4] << 24) | (data[9 + i * 4] << 16)
+		for (int i = 0; i < 16; i++)
+			registers.put(i, new Register("Unknown", (data[8 + i * 4] << 24) | (data[9 + i * 4] << 16)
 					| (data[10 + i * 4] << 8) | data[11 + i * 4]));
-		}
+
 		ts.cs = registers.get(0).getValue() >>> 16;
 		ts.ds = registers.get(1).getValue() >>> 16;
 		ts.es = registers.get(2).getValue() >>> 16;
 		ts.ss = registers.get(3).getValue() >>> 16;
 		ts.ks = registers.get(4).getValue() >>> 16;
-		for (int i = 0; i < 8; i++) {
+
+		for (int i = 0; i < 8; i++)
 			ts.setValue(i, (data[64 + i * 4] << 8) | (data[65 + i * 4]), (data[66 + i * 4] << 8)
 					| data[67 + i * 4]);
-		}
 
-		for (int i = 0; i < ram.getCapacity(); i++) {
+		for (int i = 0; i < ram.getCapacity(); i++)
 			ram.getMemory()[i] = data[104 + i];
-		}
 
 		try {
 			printRegisters();
@@ -163,11 +177,16 @@ public class VM {
 
 		IP.setValue((IpValue + ABytes + BBytes) + 1);
 
-		Log.debug("Instruction: " + String.format("%8s ", Integer.toBinaryString(instruction & 0xFF)));
-		Log.debug("Abytes: " + String.format("%2s ", Integer.toBinaryString(ABytes & 0x3)));
-		Log.debug("A: " + String.format("%24s ", Integer.toBinaryString(A & 0xFFFFFF)));
-		Log.debug("Bbytes: " + String.format("%2s ", Integer.toBinaryString(BBytes & 0x3)));
-		Log.debug("B: " + String.format("%24s ", Integer.toBinaryString(B & 0xFFFFFF)));
+		// Log.debug("Instruction: " + String.format("%8s ",
+		// Integer.toBinaryString(instruction & 0xFF)));
+		// Log.debug("Abytes: " + String.format("%2s ", Integer.toBinaryString(ABytes &
+		// 0x3)));
+		// Log.debug("A: " + String.format("%24s ", Integer.toBinaryString(A &
+		// 0xFFFFFF)));
+		// Log.debug("Bbytes: " + String.format("%2s ", Integer.toBinaryString(BBytes &
+		// 0x3)));
+		// Log.debug("B: " + String.format("%24s ", Integer.toBinaryString(B &
+		// 0xFFFFFF)));
 		Log.debug("Operation: " + String.format("%02X ", operation));
 
 		Mnemonic mnemonic = mnemonics.get(operation);
@@ -179,6 +198,7 @@ public class VM {
 
 		printRegisters();
 		printMemory();
+		printStack();
 	}
 
 	private void execute() throws Exception {
@@ -186,9 +206,11 @@ public class VM {
 		int ii = 0;
 
 		int csSize = ts.getSize(ts.cs);
-		while (IP.getValue(3) < csSize) {
+		while (IP.getValue(3) >= 0 && IP.getValue(3) < csSize) {
 			Log.debug("======     ITERACIÓN " + (ii + 1) + "	  ======");
+
 			executeNextOperation();
+
 			Log.debug("====== FIN DE ITERACIÓN " + (ii + 1) + " ======");
 			ii++;
 		}
@@ -413,7 +435,7 @@ public class VM {
 		registers.put(3, new Register("SS", ts.ss << 16));
 		registers.put(4, new Register("KS", ts.ks << 16));
 		registers.put(5, new Register("IP", ts.cs << 16 | offset & 0xFFFF));
-		registers.put(6, new Register("SP", ts.getSize(ts.ss)));
+		registers.put(6, new Register("SP", ts.ss << 16 | ts.getSize(ts.ss)));
 		registers.put(7, new Register("BP"));
 		registers.put(8, new Register("CC"));
 		registers.put(9, new Register("AC"));
@@ -464,9 +486,17 @@ public class VM {
 			Log.debug(register.getName() + ": " + String.format("%08X ", register.getValue()));
 	}
 
-	private void printMemory() {
+	private void printMemory() throws Exception {
 		for (int i = 0; i < 15; i++)
 			Log.debug("[" + i + "]: " + String.format("%02X ", ram.getValue(ts.ds << 16 | i, 1)));
-        }
+	}
+
+	private void printStack() throws Exception {
+		Log.debug("--------------Stack-----------------");
+		int stackSize = ts.getSize(ts.ss);
+		for (int i = stackSize - 40; i < stackSize; i += 4)
+			Log.debug("[" + i + "]: " + String.format("%08X ", ram.getValue(ts.ss << 16 | i, 4)));
+		Log.debug("------------------------------------");
+	}
 
 }
