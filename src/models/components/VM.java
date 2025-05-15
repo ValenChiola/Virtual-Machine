@@ -178,6 +178,7 @@ public class VM {
 		mnemonic._execute(ABytes, BBytes, A, B);
 
 		printRegisters();
+		printMemory();
 	}
 
 	private void execute() throws Exception {
@@ -356,8 +357,8 @@ public class VM {
 			return ((value & 0xFFFF) << 16) >> 16; // por las dudas
 
 		// memoria
-		int bytesToRead = bytesToAccess - (value & 0xF);
-		int registerCode = (value & 3) >> 4;
+		int bytesToRead = bytesToAccess - (value & 3);
+		int registerCode = (value & 0xFF) >> 4;
 		Register register = registers.get(registerCode);
 		if (register == null)
 			throw new Exception("Register not found.");
@@ -461,9 +462,11 @@ public class VM {
 
 		for (Register register : registers.values())
 			Log.debug(register.getName() + ": " + String.format("%08X ", register.getValue()));
+	}
 
+	private void printMemory() {
 		for (int i = 0; i < 15; i++)
 			Log.debug("[" + i + "]: " + String.format("%02X ", ram.getValue(ts.ds << 16 | i, 1)));
-	}
+        }
 
 }
