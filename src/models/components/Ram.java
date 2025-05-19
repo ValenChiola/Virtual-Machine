@@ -16,6 +16,7 @@ public class Ram {
         VM vm = VM.getInstance();
 
         int csBase = vm.ts.getBase(vm.ts.cs);
+        int ksBase = vm.ts.getBase(vm.ts.ks);
 
         int psSize = vm.ts.getSize(vm.ts.ps);
         int ksSize = vm.ts.getSize(vm.ts.ks);
@@ -50,6 +51,9 @@ public class Ram {
 
             memory[i++] = 0;
         }
+
+        // copy constant data to RAM
+        System.arraycopy(vm.constants, 0, memory, ksBase, ksSize);
 
         // copy code to RAM
         System.arraycopy(vm.code, 0, memory, csBase, csSize);

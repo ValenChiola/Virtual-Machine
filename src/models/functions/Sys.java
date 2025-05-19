@@ -45,8 +45,9 @@ public class Sys extends Mnemonic {
             for (int i = 0; i < CL; i++) {
                 int logicAddress = EDX.getValue() + i * CH;
                 int value = vm.ram.getValue(logicAddress, CH);
-                System.out.println("[" + String.format("%04X", vm.processor.logicToPhysic(logicAddress)) + "]" + ": "
-                        + Converter.numberToString(value, AL, CH));
+                System.out.println(
+                        "  [" + String.format("%04X", vm.processor.logicToPhysic(logicAddress, CH)) + "]" + ": "
+                                + Converter.numberToString(value, AL, CH));
             }
         } else if (code == 3) {
 
@@ -74,8 +75,10 @@ public class Sys extends Mnemonic {
 
                 if (lastByte != 0)
                     System.out
-                            .println("[" + String.format("%04X", vm.processor.logicToPhysic(logicAddress)) + "]" + ": "
-                                    + Converter.numberToString(lastByte, 0x02, 1));
+                            .println(
+                                    "  [" + String.format("%04X", vm.processor.logicToPhysic(logicAddress, 1)) + "]"
+                                            + ": "
+                                            + Converter.numberToString(lastByte, 0x02, 1));
 
                 i++;
             } while (lastByte != 0);

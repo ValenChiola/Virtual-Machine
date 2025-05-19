@@ -37,6 +37,7 @@ import models.functions.jumps.JNZ;
 import models.functions.jumps.JP;
 import models.functions.jumps.JZ;
 import utils.ArgsParser;
+import utils.Converter;
 import utils.log.Log;
 
 public class VM {
@@ -50,12 +51,16 @@ public class VM {
 	public Map<Integer, Register> registers;
 	public Map<Integer, Mnemonic> mnemonics;
 	byte[] code;
+	byte[] constants;
 	public int ksSize;
 	public int dsSize;
 	public int esSize;
 	public int ssSize;
 	public int offset;
 	public int version;
+
+	private String[] registerNames = { "CS", "DS", "ES", "SS", "KS", "IP", "SP", "BP", "CC", "AC", "EAX", "EBX",
+			"ECX", "EDX", "EEX", "EFX" };
 
 	private static VM instace;
 
@@ -126,8 +131,9 @@ public class VM {
 
 		registers = new HashMap<>();
 		for (int i = 0; i < 16; i++)
-			registers.put(i, new Register("Unknown", (data[8 + i * 4] << 24) | (data[9 + i * 4] << 16)
-					| (data[10 + i * 4] << 8) | data[11 + i * 4]));
+			registers.put(i, new Register(
+					registerNames[i], (data[8 + i * 4] << 24) | (data[9 + i * 4] << 16)
+							| (data[10 + i * 4] << 8) | data[11 + i * 4]));
 
 		ts.cs = registers.get(0).getValue() >>> 16;
 		ts.ds = registers.get(1).getValue() >>> 16;
@@ -141,6 +147,12 @@ public class VM {
 
 		for (int i = 0; i < ram.getCapacity(); i++)
 			ram.getMemory()[i] = data[104 + i];
+
+		code = new byte[ts.getSize(ts.cs)];
+		System.arraycopy(ram.getMemory(), ts.getBase(ts.cs), code, 0, ts.getSize(ts.cs));
+
+		constants = new byte[ts.getSize(ts.ks)];
+		System.arraycopy(ram.getMemory(), ts.getBase(ts.ks), constants, 0, ts.getSize(ts.ks));
 
 		try {
 			printRegisters();
@@ -219,11 +231,39 @@ public class VM {
 	private void disassembler() throws Exception {
 		System.out.println("--------------------------------");
 
-		Register IP = registers.get(5);
+		int maxSeparation = 20;
 
+		// Constants
+		if (constants != null) {
+			int i = 0;
+			while (i < constants.length) {
+				int address = i;
+				StringBuilder bytes = new StringBuilder();
+				StringBuilder string = new StringBuilder();
+
+				int j = i;
+				while (j < constants.length && constants[j] != '\0') {
+					bytes.append(String.format("%02X ", constants[j]));
+					string.append(Converter.numberToString(constants[j], 0x02, 1));
+					i++;
+					j++;
+				}
+				i++;
+
+				if (bytes.length() > maxSeparation)
+					maxSeparation = bytes.length();
+
+				System.out.println("  [" + String.format("%04X", address) + "] " + String.format(
+						"%-" + maxSeparation + "s", bytes.toString()) + " | "
+						+ string.toString());
+			}
+
+		}
+
+		int IpValue = ts.cs << 16;
 		int csSize = ts.getSize(ts.cs);
-		while (IP.getValue(3) < csSize) {
-			int IpValue = IP.getValue();
+
+		while ((IpValue & 0xFFFF) < csSize) {
 
 			int instruction = ram.getValue(IpValue, 1);
 
@@ -231,16 +271,10 @@ public class VM {
 			int ABytes = ((instruction & 0x30) >> 4);
 			int operation = (instruction & 0x1F);
 
-			int B = 0;
-			int A = 0;
+			int B = ram.getValue(IpValue + 1, BBytes);
+			int A = ram.getValue((IpValue + BBytes) + 1, ABytes);
 
-			for (int i = 1; i < BBytes + 1; i++)
-				B = (B << 8) | ram.getValue(IpValue + i, 1) & 0xFFFFFF;
-
-			for (int i = 1; i < ABytes + 1; i++)
-				A = (A << 8) | ram.getValue(IpValue + BBytes + i, 1) & 0xFFFFFF;
-
-			IP.setValue(IpValue + (ABytes + BBytes + 1));
+			int increment = ABytes + BBytes + 1;
 
 			Mnemonic mnemonic = mnemonics.get(operation);
 
@@ -250,33 +284,40 @@ public class VM {
 				String BOperand = getDisassemblerOperand(BBytes, B);
 				String AOperand = getDisassemblerOperand(ABytes, A);
 
-				byte[] aux = new byte[(ABytes + BBytes + 1)];
-				System.arraycopy(code, IpValue & 0xFFFF, aux, 0, ((ABytes + BBytes + 1)));
-				String bytes = "";
+				byte[] aux = new byte[increment];
+				System.arraycopy(code, IpValue & 0xFFFF, aux, 0, increment);
 
+				String bytes = "";
 				for (byte b : aux)
 					bytes += String.format("%02X", b) + " ";
 
-				String firstPart = "[" + String.format("%04X", IpValue) + "] " + String.format(
-						"%-20s", bytes) + "\t|\t"
+				boolean isEntryPoint = (IpValue & 0xFFFF) == 0;
+
+				String firstPart = (isEntryPoint ? "> ["
+						: "  [")
+						+ String.format("%04X", processor.logicToPhysic(IpValue, increment))
+						+ "] "
+						+ String.format(
+								"%-" + maxSeparation + "s", bytes)
+						+ " | "
 						+ mnemonic.getName() + " ";
+
+				String secondPart = ((operation >= 0x01 && operation <= 0x07) // Jumps
+						? "<" + String.format("%04X",
+								Integer.valueOf(BOperand)) + ">"
+						: BOperand);
 
 				if (ABytes == 0 && BBytes == 0)
 					System.out.println(firstPart);
 				else if (ABytes == 0)
-					System.out.println(firstPart + ""
-							+ ((operation >= 0x01 && operation <= 0x07) // Jumps
-									? "<" + String.format("%04X",
-											Integer.valueOf(BOperand)) + ">"
-									: BOperand));
+					System.out.println(firstPart + secondPart);
 				else
 					System.out.println(firstPart + AOperand + ", " + BOperand);
 			}
 
+			IpValue += increment;
 		}
 		System.out.println("--------------------------------");
-
-		IP.setValue(ts.cs << 16); // Restart
 	}
 
 	private String getDisassemblerOperand(int type, int value) {
@@ -417,6 +458,8 @@ public class VM {
 			ksSize = (content[14] << 8) | (((int) content[15] << 24) >>> 24);
 			offset = (content[16] << 8) | (((int) content[17] << 24) >>> 24);
 			System.arraycopy(content, 18, code, 0, csSize);
+			constants = new byte[ksSize];
+			System.arraycopy(content, 18 + csSize, constants, 0, ksSize);
 		} else {
 			throw new Exception("Invalid version");
 		}
