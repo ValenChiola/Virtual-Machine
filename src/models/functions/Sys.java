@@ -28,6 +28,8 @@ public class Sys extends Mnemonic {
         Register EDX = vm.registers.get(13);
         Register ECX = vm.registers.get(12);
         Register EAX = vm.registers.get(10);
+
+        int CX = ECX.getValue(3);
         int CH = ECX.getValue(2);
         int CL = ECX.getValue(1);
         int AL = EAX.getValue(1);
@@ -43,15 +45,48 @@ public class Sys extends Mnemonic {
             for (int i = 0; i < CL; i++) {
                 int logicAddress = EDX.getValue() + i * CH;
                 int value = vm.ram.getValue(logicAddress, CH);
-                System.out.println("[" + String.format("%04X", vm.processor.logicToPhysic(logicAddress)) + "]" + ": "
-                        + Converter.numberToString(value, AL, CH));
+                System.out.println(
+                        "  [" + String.format("%04X", vm.processor.logicToPhysic(logicAddress, CH)) + "]" + ": "
+                                + Converter.numberToString(value, AL, CH));
             }
         } else if (code == 3) {
 
+            String data = sc.nextLine();
+
+            if (CX == -1)
+                CX = data.length();
+
+            int i = 0;
+            while (i < CX && i < data.length()) {
+                int logicAddress = EDX.getValue() + i;
+                vm.ram.setValue(logicAddress, data.charAt(i), 1);
+                i++;
+            }
+
+            vm.ram.setValue(EDX.getValue() + i, 0, 1); // \0
+
         } else if (code == 4) {
+            int i = 0;
+
+            int lastByte = 0;
+            do {
+                int logicAddress = EDX.getValue() + i;
+                lastByte = vm.ram.getValue(logicAddress, 1);
+
+                if (lastByte != 0)
+                    System.out
+                            .println(
+                                    "  [" + String.format("%04X", vm.processor.logicToPhysic(logicAddress, 1)) + "]"
+                                            + ": "
+                                            + Converter.numberToString(lastByte, 0x02, 1));
+
+                i++;
+            } while (lastByte != 0);
 
         } else if (code == 7) {
-
+            // Clear Screen
+            System.out.print("\033[H\033[2J");
+            System.out.flush();
         } else if (code == 0xF) {
             String vmiFile = ArgsParser.getVmiFile();
             if (vmiFile == null)

@@ -20,8 +20,10 @@ public class Processor {
             throw new Exception("Out of bounds! Lower limit reached!");
 
         int limit = vm.ts.getLimit(segment);
+
         if (physicAddress + bytesToAccess > limit)
-            throw new Exception("Out of bounds! Segment limit reached!");
+            throw new Exception(
+                    "Out of bounds! Segment limit reached! " + (physicAddress + bytesToAccess) + " > " + limit);
 
         return physicAddress;
     }

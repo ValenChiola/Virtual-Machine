@@ -1,9 +1,6 @@
 
 package models.functions;
 
-import models.components.Register;
-import models.components.VM;
-
 public class Ret extends Mnemonic {
 
   public Ret() {
@@ -12,10 +9,8 @@ public class Ret extends Mnemonic {
 
   @Override
   public void execute() throws Exception {
-    VM vm = VM.getInstance();
-    Register IP = vm.registers.get(5);
-
-    new Pop().execute(2, IP.getValue(3));
+    int IpRegisterCode = 5;
+    new Pop().execute(1, (IpRegisterCode << 4));
   }
 
 }
