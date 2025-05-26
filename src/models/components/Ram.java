@@ -26,35 +26,38 @@ public class Ram {
         int esSize = vm.ts.getSize(vm.ts.es);
 
         int requestedSize = psSize + ksSize + csSize + dsSize + ssSize + esSize;
+
         if (requestedSize > capacity)
             throw new Exception(
                     "Not enough memory - Requested: " + requestedSize + " bytes, Available: " + capacity + " bytes");
+        if (vm.version == 2) {
+            // copy params to RAM
+            List<String> params = ArgsParser.getProgramParams();
 
-        // copy params to RAM
-        List<String> params = ArgsParser.getProgramParams();
+            int i = 0;
+            int paramCounter = 0;
+            int initPointerIndex = psSize - 4 * params.size();
 
-        int i = 0;
-        int paramCounter = 0;
-        int initPointerIndex = psSize - 4 * params.size();
+            for (String param : params) {
+                try {
 
-        for (String param : params) {
-            try {
+                    setValue(initPointerIndex + paramCounter * 4, i);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return;
+                }
+                paramCounter++;
+                for (int j = 0; j < param.length(); j++)
+                    memory[i++] = (byte) param.charAt(j);
 
-                setValue(initPointerIndex + paramCounter * 4, i);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return;
+                memory[i++] = 0;
             }
-            paramCounter++;
-            for (int j = 0; j < param.length(); j++)
-                memory[i++] = (byte) param.charAt(j);
 
-            memory[i++] = 0;
+            // copy constant data to RAM
+            if (ksSize > 0)
+                System.arraycopy(vm.constants, 0, memory, ksBase, ksSize);
+
         }
-
-        // copy constant data to RAM
-        System.arraycopy(vm.constants, 0, memory, ksBase, ksSize);
-
         // copy code to RAM
         System.arraycopy(vm.code, 0, memory, csBase, csSize);
     }

@@ -108,15 +108,17 @@ public class VM {
 			registers();
 
 			// Push params to stack (Main Subrutine)
-			int psSize = ts.getSize(ts.ps);
-			int params = ArgsParser.getProgramParams().size();
-			int argv = psSize - 4 * params;
+			if (version == 2) {
+				int psSize = ts.getSize(ts.ps);
+				int params = ArgsParser.getProgramParams().size();
+				int argv = psSize - 4 * params;
 
-			new Push().execute(2, params > 0 ? argv : -1); // Pointer to argv
+				new Push().execute(2, params > 0 ? argv : -1); // Pointer to argv
 
-			new Push().execute(2, params); // Number of params
+				new Push().execute(2, params); // Number of params
 
-			new Push().execute(2, -1); // Return address of main subrutine
+				new Push().execute(2, -1); // Return address of main subrutine
+			}
 
 		}
 
@@ -189,16 +191,6 @@ public class VM {
 
 		IP.setValue((IpValue + ABytes + BBytes) + 1);
 
-		// Log.debug("Instruction: " + String.format("%8s ",
-		// Integer.toBinaryString(instruction & 0xFF)));
-		// Log.debug("Abytes: " + String.format("%2s ", Integer.toBinaryString(ABytes &
-		// 0x3)));
-		// Log.debug("A: " + String.format("%24s ", Integer.toBinaryString(A &
-		// 0xFFFFFF)));
-		// Log.debug("Bbytes: " + String.format("%2s ", Integer.toBinaryString(BBytes &
-		// 0x3)));
-		// Log.debug("B: " + String.format("%24s ", Integer.toBinaryString(B &
-		// 0xFFFFFF)));
 		Log.debug("Operation: " + String.format("%02X ", operation));
 
 		Mnemonic mnemonic = mnemonics.get(operation);
@@ -459,7 +451,8 @@ public class VM {
 			offset = (content[16] << 8) | (((int) content[17] << 24) >>> 24);
 			System.arraycopy(content, 18, code, 0, csSize);
 			constants = new byte[ksSize];
-			System.arraycopy(content, 18 + csSize, constants, 0, ksSize);
+			if (ksSize > 0)
+				System.arraycopy(content, 18 + csSize, constants, 0, ksSize);
 		} else {
 			throw new Exception("Invalid version");
 		}
@@ -479,7 +472,7 @@ public class VM {
 		registers.put(4, new Register("KS", ts.ks << 16));
 		registers.put(5, new Register("IP", ts.cs << 16 | offset & 0xFFFF));
 		registers.put(6, new Register("SP", ts.ss << 16 | ts.getSize(ts.ss)));
-		registers.put(7, new Register("BP"));
+		registers.put(7, new Register("BP", ts.ss << 16));
 		registers.put(8, new Register("CC"));
 		registers.put(9, new Register("AC"));
 		registers.put(10, new Register("EAX"));
@@ -530,11 +523,13 @@ public class VM {
 	}
 
 	private void printMemory() throws Exception {
-		for (int i = 0; i < 15; i++)
+		for (int i = 0; i < 32; i++)
 			Log.debug("[" + i + "]: " + String.format("%02X ", ram.getValue(ts.ds << 16 | i, 1)));
 	}
 
 	private void printStack() throws Exception {
+		if (version == 1)
+			return;
 		Log.debug("--------------Stack-----------------");
 		int stackSize = ts.getSize(ts.ss);
 		for (int i = stackSize - 40; i < stackSize; i += 4)

@@ -9,12 +9,12 @@ import java.util.List;
 public class TableSegments {
 
     private Map<Integer, Integer[]> table;
-    public int ps;
-    public int ks;
-    public int cs;
-    public int ds = 1;
-    public int es;
-    public int ss;
+    public int ps = -1;
+    public int ks = -1;
+    public int cs = -1;
+    public int ds = -1;
+    public int es = -1;
+    public int ss = -1;
 
     public TableSegments() {
         table = new HashMap<>();
@@ -23,6 +23,8 @@ public class TableSegments {
     public void init() {
         VM vm = VM.getInstance();
         if (vm.version == 1) {
+            cs = 0;
+            ds = 1;
             table.put(cs, new Integer[] { 0, vm.code.length });
             table.put(ds, new Integer[] { vm.code.length, vm.ram.getCapacity() - vm.code.length });
         } else if (vm.version == 2) {

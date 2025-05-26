@@ -25,13 +25,13 @@ El proyecto es **multiplataforma**. Puede ejecutarse en cualquier sistema operat
 Para ejecutar la máquina virtual desde la terminal, usar el siguiente comando:
 
 ```bash
-java -jar vm.jar archivo.vmx [-d]
+java -jar vm.jar archivo.vmx archivo.vmi [-d] [m=<memoria>] [-p <arg1> <arg2> ...]
 ```
 
 Si se desea compilar nuevamente utilice **vm.sh**:
 
 ```bash
-./vm.sh archivo.vmx [-d]
+./vm.sh archivo.vmx archivo.vmi [-d] [m=<memoria>] [-p <arg1> <arg2> ...]
 ```
 
 ## 🐙 Github
