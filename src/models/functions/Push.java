@@ -16,7 +16,7 @@ public class Push extends Mnemonic {
 
     SP.setValue(SP.getValue() - 4);
 
-    if (SP.getValue() < 0)
+    if (SP.getValue(3) < 0)
       throw new Exception("Stack overflow");
 
     vm.ram.setValue(SP.getValue(), vm.dataReadHandler(B, typeB));

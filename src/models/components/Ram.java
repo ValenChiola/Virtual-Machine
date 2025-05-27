@@ -40,7 +40,6 @@ public class Ram {
 
             for (String param : params) {
                 try {
-
                     setValue(initPointerIndex + paramCounter * 4, i);
                 } catch (Exception e) {
                     e.printStackTrace();

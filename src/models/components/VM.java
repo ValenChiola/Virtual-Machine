@@ -171,7 +171,6 @@ public class VM {
 
 		if (ArgsParser.isDissasemblerEnabled())
 			disassembler();
-
 		execute();
 
 	}
@@ -209,6 +208,8 @@ public class VM {
 		Register IP = registers.get(5);
 		int ii = 0;
 
+		printParams();
+		printRegisters();
 		int csSize = ts.getSize(ts.cs);
 		while (IP.getValue(3) >= 0 && IP.getValue(3) < csSize) {
 			Log.debug("======     ITERACIÓN " + (ii + 1) + "	  ======");
@@ -470,7 +471,7 @@ public class VM {
 		registers.put(2, new Register("ES", ts.es << 16));
 		registers.put(3, new Register("SS", ts.ss << 16));
 		registers.put(4, new Register("KS", ts.ks << 16));
-		registers.put(5, new Register("IP", ts.cs << 16 | offset & 0xFFFF));
+		registers.put(5, new Register("IP", ts.cs << 16 | (offset & 0xFFFF)));
 		registers.put(6, new Register("SP", ts.ss << 16 | ts.getSize(ts.ss)));
 		registers.put(7, new Register("BP", ts.ss << 16));
 		registers.put(8, new Register("CC"));
@@ -534,6 +535,16 @@ public class VM {
 		int stackSize = ts.getSize(ts.ss);
 		for (int i = stackSize - 40; i < stackSize; i += 4)
 			Log.debug("[" + i + "]: " + String.format("%08X ", ram.getValue(ts.ss << 16 | i, 4)));
+		Log.debug("------------------------------------");
+	}
+
+	private void printParams() throws Exception {
+		if (version == 1)
+			return;
+		Log.debug("--------------Params-----------------");
+		int paramSize = ts.getSize(ts.ps);
+		for (int i = 0; i < paramSize; i += 1)
+			Log.debug("[" + i + "]: " + String.format("%02X ", ram.getValue(i, 1)));
 		Log.debug("------------------------------------");
 	}
 

@@ -1,7 +1,5 @@
 package models.functions;
 
-import models.components.Register;
-import models.components.VM;
 import models.functions.jumps.JMP;
 
 public class Call extends Mnemonic {
@@ -12,9 +10,7 @@ public class Call extends Mnemonic {
 
   @Override
   public void execute(int typeB, int B) throws Exception {
-    VM vm = VM.getInstance();
-    Register IP = vm.registers.get(5);
-    new Push().execute(2, IP.getValue(3));
+    new Push().execute(1, 0x0500);
     new JMP().execute(typeB, B);
   }
 
