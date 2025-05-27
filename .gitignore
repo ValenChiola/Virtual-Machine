@@ -3,8 +3,8 @@
 .classpath
 *.txt
 *.asm
-*.vmx
-*.vmi
+# *.vmx
+# *.vmi
 /build
 *.jar
 .gradle
