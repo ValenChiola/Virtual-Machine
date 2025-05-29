@@ -43,15 +43,15 @@ public class Register {
     }
 
     public String getName(int identifier) {
-        if (identifier == 0 || this.name.length() < 3) return this.name; // Retornar el valor completo
-        
+        if (identifier == 0 || this.name.length() < 3)
+            return this.name; // Retornar el valor completo
 
-        if (identifier == 1)  // AL (8 bits)
+        if (identifier == 1) // AL (8 bits)
             return this.name.charAt(1) + "L"; // Extender signo (convertirlo en int de 32 bits)
-        
+
         if (identifier == 2) // AH (8 bits)
             return this.name.charAt(1) + "H"; // Extender signo (convertirlo en int de 32 bits)
-        
+
         // AX (16 bits)
         return this.name.substring(1);
     }

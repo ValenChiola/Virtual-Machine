@@ -19,7 +19,6 @@ public class Pop extends Mnemonic {
       vm.dataWriteHandler(B, value, typeB);
       SP.setValue(SP.getValue() + 4);
     } catch (Exception e) {
-      System.out.println(e.getMessage());
       throw new Exception("Stack underflow");
     }
   }

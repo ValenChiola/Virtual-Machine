@@ -80,7 +80,7 @@ public class Ram {
         for (int i = 0; i < bytesToRead; i++)
             data = (data << 8) | (this.memory[physicAddress + i] & 0xFF);
 
-        return data;
+        return (data << (32 - (bytesToRead * 8)) >> (32 - (bytesToRead * 8)));
     }
 
     public void setValue(int logicAddress, int value) throws Exception {

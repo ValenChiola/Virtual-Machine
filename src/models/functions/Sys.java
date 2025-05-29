@@ -36,9 +36,9 @@ public class Sys extends Mnemonic {
 
         if (code == 1) { // Read
             for (int i = 0; i < CL; i++) {
-                System.out.print(">>> ");
-                int data = Converter.stringToNumber(sc.nextLine(), AL);
                 int logicAddress = EDX.getValue() + i * CH;
+                System.out.print("[" + String.format("%04X", vm.processor.logicToPhysic(logicAddress, CH)) + "]: ");
+                int data = Converter.stringToNumber(sc.nextLine(), AL);
                 vm.ram.setValue(logicAddress, data, CH);
             }
         } else if (code == 2) { // Write
@@ -46,7 +46,7 @@ public class Sys extends Mnemonic {
                 int logicAddress = EDX.getValue() + i * CH;
                 int value = vm.ram.getValue(logicAddress, CH);
                 System.out.println(
-                        "  [" + String.format("%04X", vm.processor.logicToPhysic(logicAddress, CH)) + "]" + ": "
+                        "[" + String.format("%04X", vm.processor.logicToPhysic(logicAddress, CH)) + "]" + ": "
                                 + Converter.numberToString(value, AL, CH));
             }
         } else if (code == 3) {
@@ -73,13 +73,12 @@ public class Sys extends Mnemonic {
                 int logicAddress = EDX.getValue() + i;
                 lastByte = vm.ram.getValue(logicAddress, 1);
 
-                if (lastByte != 0)
-                    System.out
-                            .println(
-                                    "  [" + String.format("%04X", vm.processor.logicToPhysic(logicAddress, 1)) + "]"
-                                            + ": "
-                                            + Converter.numberToString(lastByte, 0x02, 1));
-
+                if (lastByte != 0) {
+                    if (lastByte == 10)
+                        System.out.println();
+                    else
+                        System.out.print(Converter.numberToString(lastByte, 0x02, 1));
+                }
                 i++;
             } while (lastByte != 0);
 

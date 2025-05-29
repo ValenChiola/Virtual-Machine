@@ -18,13 +18,13 @@ public class Converter {
     public static String numberToString(int data, int AL, int CH) {
         String result = "";
         if ((AL & 0x10) != 0) // Binario
-            result += "0b" + Integer.toBinaryString(data).replace(' ', '0') + " ";
+            result += "0b" + Integer.toBinaryString(data).replace(' ', '0');
 
         if ((AL & 0x08) != 0) // Hexadecimal
-            result += "0x" + Integer.toHexString(data).toUpperCase().replace(' ', '0') + " ";
+            result += (result.isEmpty() ? "" : " ") + "0x" + Integer.toHexString(data).toUpperCase().replace(' ', '0');
 
         if ((AL & 0x04) != 0) // Octal
-            result += "0o" + Integer.toOctalString(data).replace(' ', '0') + " ";
+            result += (result.isEmpty() ? "" : " ") + "0o" + Integer.toOctalString(data).replace(' ', '0');
 
         if ((AL & 0x02) != 0) { // Caracteres
             char c1 = (char) (data & 0xFF);
@@ -41,15 +41,15 @@ public class Converter {
             if ((c4 <= 31 || c4 >= 127) && CH >= 4)
                 c4 = '.';
 
-            result += "" + c4 + c3 + c2 + c1 + " ";
+            result += (result.isEmpty() ? "" : " ") + c4 + c3 + c2 + c1;
         }
 
         if ((AL & 0x01) != 0) // Decimal
-            result += data + " ";
+            result += (result.isEmpty() ? "" : " ") + data;
 
         if (result.isEmpty())
             throw new Error("Converter failed: no valid mode in AL");
 
-        return result.trim();
+        return result;
     }
 }

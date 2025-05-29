@@ -9,8 +9,7 @@ public class Ret extends Mnemonic {
 
   @Override
   public void execute() throws Exception {
-    int IpRegisterCode = 5;
-    new Pop().execute(1, (IpRegisterCode << 4));
+    new Pop().execute(1, (0x50));
   }
 
 }
