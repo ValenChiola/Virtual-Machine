@@ -86,7 +86,7 @@ public class ArgsParser {
         return getInstance().vmiFile;
     }
 
-    public static boolean isDissasemblerEnabled() {
+    public static boolean isDisassemblerEnabled() {
         return getFlag("d") != null;
     }
 

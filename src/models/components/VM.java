@@ -141,6 +141,7 @@ public class VM {
 					registerNames[i], value1 | value2 | value3 | value4));
 		}
 
+		offset = registers.get(5).getValue(3);
 		ts.cs = registers.get(0).getValue() >>> 16;
 		ts.ds = registers.get(1).getValue() >>> 16;
 		ts.es = registers.get(2).getValue() >>> 16;
@@ -177,7 +178,7 @@ public class VM {
 
 	public void start() throws Exception {
 
-		if (ArgsParser.isDissasemblerEnabled())
+		if (ArgsParser.isDisassemblerEnabled())
 			disassembler();
 		execute();
 
@@ -294,9 +295,9 @@ public class VM {
 				for (byte b : aux)
 					bytes += String.format("%02X", b) + " ";
 
-				boolean isEntryPoint = (IpValue & 0xFFFF) == 0;
+				boolean isEntryPoint = (IpValue & 0xFFFF) == offset;
 
-				String firstPart = (isEntryPoint ? "> ["
+				String firstPart = (isEntryPoint ? " >["
 						: "  [")
 						+ String.format("%04X", processor.logicToPhysic(IpValue, increment))
 						+ "] "
