@@ -165,10 +165,10 @@ public class VM {
 		System.arraycopy(ram.getMemory(), ts.getBase(ts.ks), constants, 0,
 				ts.getSize(ts.ks));
 
-		System.out.println("--------------------------------");
-		System.out.println("Version: " + version);
-		System.out.println("CodeSize: " + ts.getSize(ts.cs));
-		System.out.println("--------------------------------");
+		Log.debug("--------------------------------");
+		Log.debug("Version: " + version);
+		Log.debug("CodeSize: " + ts.getSize(ts.cs));
+		Log.debug("--------------------------------");
 
 	}
 
@@ -461,11 +461,11 @@ public class VM {
 		} else {
 			throw new Exception("Invalid version");
 		}
-		System.out.println("--------------------------------");
-		System.out.println("Version: " + version);
-		System.out.println("Offset: " + offset);
-		System.out.println("CodeSize: " + csSize);
-		System.out.println("--------------------------------");
+		Log.debug("--------------------------------");
+		Log.debug("Version: " + version);
+		Log.debug("Offset: " + offset);
+		Log.debug("CodeSize: " + csSize);
+		Log.debug("--------------------------------");
 	}
 
 	private void registers() {
